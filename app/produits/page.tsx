@@ -105,13 +105,13 @@ export default function Page() {
                                         <div className="w-20 h-20 rounded-full border-4 border-orange-700 flex items-center justify-center text-[#022d13] font-bold text-2xl mb-2">
                                             p
                                         </div>
-                                        <div className="text-lg font-bold text-gray-800 text-center">Dev Mobisoft</div>
+                                        <div className="text-lg font-bold text-gray-800 text-center">Dev </div>
                                         <div className="text-sm text-gray-500 text-center">Producteur</div>
                                     </div>
 
                                     <div className="space-y-2">
                                         {[
-                                            { title: 'Mon catalogue', desc: 'Gérez vos produits', icon: <Package className="size-6" /> },
+                                            { title: 'Mes produits', desc: 'Gérez vos produits', icon: <Package className="size-6" /> },
                                             { title: 'Commandes', desc: 'Produits commandés', icon: <ClipboardList className="size-6" /> },
                                             { title: 'Achats et ventes', desc: 'Suivi des transactions', icon: <ShoppingCart className="size-6" /> },
                                             { title: 'Paramètres', desc: 'Compte et sécurité', icon: <Settings className="size-6" /> }
@@ -155,14 +155,9 @@ export default function Page() {
 
                                         <div className="space-y-4">
                                             {[
-                                                { title: 'Mon profil', icon: <User size={20} /> },
-                                                { title: 'Mon catalogue', icon: <Package size={20} />, active: true },
-                                                { title: 'Publier une offre', icon: <PlusSquare size={20} /> },
+                                                { title: 'Mes produits', icon: <Package size={20} />, active: true },
                                                 { title: 'Achats et ventes', icon: <ShoppingCart size={20} /> },
                                                 { title: 'Commandes', icon: <ClipboardList size={20} /> },
-                                                { title: 'Demandes', icon: <ClipboardList size={20} /> },
-                                                { title: 'Favoris', icon: <Heart size={20} /> },
-                                                { title: 'Notes produits', icon: <Star size={20} /> },
                                                 { title: 'Paramètres', icon: <Settings size={20} /> }
                                             ].map((item, i) => (
                                                 <div
