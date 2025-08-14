@@ -87,7 +87,6 @@ export interface Decoupage {
     localite: Localite;
 }
 
-
 export interface Activite {
     id: string;
     nom: string;
@@ -153,4 +152,23 @@ export interface AutreSpeculation {
     createdAt: string;
     updatedAt: string;
     speculation: Speculation; // détail de la spéculation liée
+}
+
+
+export interface ControlStatsResponse {
+    val: number;
+    non_traite: number;
+    rej: number;
+    doublon: number;
+    encours: number;
+    del: number;
+    image_incor: number;
+    doublon_number: number;
+    agent: {
+        user_control_id: string;
+        name: string;
+        email: string;
+        phoneNumber: string;
+        nb_dossiers_tires: number;
+    };
 }

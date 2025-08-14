@@ -81,7 +81,7 @@ export default function SearchFilter({
                 <button
                     type="button"
                     disabled={disabled}
-                    className={`w-full px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-300 pr-10 ${disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''} ${className}`}
+                    className={`w-full px-3 py-2 text-left bg-white border border-gray-8 rounded-md pr-10 ${disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''} ${className}`}
                     onClick={() => {
                         if (!disabled) setIsOpen(!isOpen);
                     }}
@@ -141,7 +141,7 @@ export default function SearchFilter({
                                     key={option.id}
                                     type="button"
                                     disabled={disabled}
-                                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${disabled ? 'cursor-not-allowed text-gray-400' : ''}`}
+                                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-10 focus:bg-gray-100 focus:outline-none ${disabled ? 'cursor-not-allowed text-gray-400' : ''}`}
                                     onClick={() => handleSelect(option.id)}
                                 >
                                     {option.nom}

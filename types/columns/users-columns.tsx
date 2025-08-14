@@ -28,7 +28,7 @@ function isImage(url: string): boolean {
 export function getUserColumns(onPreview: (url: string, isImage: boolean) => void): ColumnDef<User>[] {
     return [
         {
-            accessorKey: "image",
+            accessorKey: "photo",
             header: "PHOTO",
             cell: ({ row }) => {
                 const image = row.original.photo;
@@ -69,6 +69,13 @@ export function getUserColumns(onPreview: (url: string, isImage: boolean) => voi
             header: "TÉLÉPHONE",
             cell: ({ row }) => <div>{row.original.phoneNumber}</div>,
         },
+        // code
+        {
+            accessorKey: "code",
+            header: "CODE",
+            cell: ({ row }) => <div>{row.original.codeGenerate}</div>,
+        }
+        ,
         {
             accessorKey: "status",
             header: "STATUT",
@@ -139,8 +146,8 @@ export function getUserColumns(onPreview: (url: string, isImage: boolean) => voi
             },
         },
         {
-            accessorKey: "carte",
-            header: "CNI",
+            accessorKey: "document1",
+            header: "CNI RECTO",
             cell: ({ row }) => {
                 const document1 = row.original.document1;
                 return document1 ? (
@@ -157,8 +164,8 @@ export function getUserColumns(onPreview: (url: string, isImage: boolean) => voi
             },
         },
         {
-            accessorKey: "permis",
-            header: "PERMIS",
+            accessorKey: "document2",
+            header: "CNI VERSO  ",
             cell: ({ row }) => {
                 const document2 = row.original.document2;
                 return document2 ? (

@@ -17,22 +17,29 @@ import { ProductsRequest } from "@/types/ApiRequest/ProductsRequest";
 import { TypeCompte } from "@/types/ApiRequest/EnrollementRequest";
 import { UserEnrollementData } from "@/types/ApiReponse/userEnrollementData";
 import { SubmitHandler } from "react-hook-form";
+import { createProduct } from "@/api/services/productServices";
+import { toast } from "sonner";
+import Image from "next/image";
+
 
 const venteTypes = ["vente en gros", "vente en unité"];
 const paymentMethods = ["Mobile Money", "Espèces", "Carte Bancaire"];
 const typeActeurs = ["AGRICULTEURS", "AQUACULTEURS", "AUTRE_ACTEURS", "APICULTEURS", "REVENDEUR", "TRANSFORMATEUR", "ACHETEUR"];
 const unites = ["KG", "SAC", "TRICYCLE", "TONNE", 'BOITE'];
+const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
 const productSchema = z.object({
-    libelle: z.string().min(2, "Libellé requis"),
+    nom: z.string().min(2, "Libellé requis"),
     paymentMethod: z.string().min(1, "Méthode requise"),
-    unit: z.string().min(1, "Unité requise"),
-    quantity: z.coerce.number().positive("Quantité requise"),
-    price: z.coerce.number().positive("Prix requis"),
+    unite: z.string().min(1, "Unité requise"),
+    quantite: z.coerce.number().positive("Quantité requise"),
+    prixUnitaire: z.coerce.number().positive("Prix requis"),
+    prixEnGros: z.coerce.number().positive("Prix en grosse requis"),
     saleType: z.string().min(1, "Type de vente requis"),
-    type_acteur: z.nativeEnum(TypeCompte),
-    availableStartDate: z.string().min(1, "Date de début requise"),
-    availableEndDate: z.string().min(1, "Date de fin requise"),
+    typeActeur: z.nativeEnum(TypeCompte),
+    disponibleDe: z.string().min(1, "Date de début requise"),
+    disponibleJusqua: z.string().min(1, "Date de fin requise"),
+
     description: z.string().min(5, "Description requise"),
     images: z.instanceof(File).optional(),
     autre_images: z.instanceof(File).optional(),
@@ -43,19 +50,21 @@ const productSchema = z.object({
         sousPrefectureId: z.string(),
         localiteId: z.string(),
     }),
-}).refine(data => new Date(data.availableStartDate) <= new Date(data.availableEndDate), {
+}).refine(data => new Date(data.disponibleDe) <= new Date(data.disponibleJusqua), {
     message: "La date de début doit être antérieure ou égale à la date de fin.",
-    path: ["availableEndDate"],
+    path: ["disponibleJusqua"],
 });
 
 // type ProductsRequest = z.infer<typeof productSchema>;
-
 interface ProductFormProps {
     initialValues?: Partial<ProductsRequest>;
     userEnrollementData: UserEnrollementData | null;
+    fechproductsByCode: () => Promise<void>; // ✅ bon type
+    setActiveTab: (tab: 'liste' | 'ajout') => void;
+    codeUsers?: string | null;
 }
 
-export default function ProductForm({ initialValues, userEnrollementData }: ProductFormProps) {
+export default function ProductForm({ initialValues, userEnrollementData, fechproductsByCode, setActiveTab, codeUsers }: ProductFormProps) {
 
     const [previewData, setPreviewData] = useState<ProductsRequest | null>(null);
     const [files, setFiles] = useState<Record<string, File[]>>({});
@@ -77,6 +86,9 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
     }
 
     const defaultTypeActeur = getValidTypeActeur(userEnrollementData?.enrollement?.TypeCompte);
+    const toDateInputFormat = (isoString?: string) => {
+        return isoString ? new Date(isoString).toISOString().split('T')[0] : '';
+    };
 
     const {
         register,
@@ -90,8 +102,10 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
         resolver: zodResolver(productSchema),
         mode: "onChange",
         defaultValues: {
-            type_acteur: defaultTypeActeur,
+            typeActeur: defaultTypeActeur,
             ...initialValues,
+            disponibleDe: toDateInputFormat(initialValues?.disponibleDe),
+            disponibleJusqua: toDateInputFormat(initialValues?.disponibleJusqua),
             decoupage: {
                 districtId: '',
                 regionId: '',
@@ -106,7 +120,7 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
     useEffect(() => {
         const value = userEnrollementData?.enrollement?.TypeCompte;
         if (value && typeActeurs.includes(value)) {
-            setValue("type_acteur", value as TypeCompte, { shouldValidate: true });
+            setValue("typeActeur", value as TypeCompte, { shouldValidate: true });
         }
     }, [userEnrollementData, setValue]);
 
@@ -146,6 +160,7 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
     };
 
     const onSubmitHandler: SubmitHandler<ProductsRequest> = async (data) => {
+
         if (!userEnrollementData?.decoupage) {
             console.warn("Découpage utilisateur non disponible");
             return;
@@ -158,57 +173,55 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
             localiteId: userEnrollementData.decoupage.localite?.id,
         };
 
-        console.log('🚀 ProductsRequest:', data);
-        console.log('🗺️ Découpage:', decoupage);
+        console.log('🚀 codeUsers:', codeUsers);
+        // console.log('🗺️ Découpage:', decoupage);
         const formData = new FormData();
-        formData.append('nom', data.libelle);
+        formData.append('nom', data.nom);
         formData.append('description', data.description);
-        formData.append('quantite', data.quantity.toString());
-        formData.append('prixUnitaire', data.price.toString());
+        formData.append('quantite', data.quantite.toString());
+        formData.append('prixUnitaire', data.prixUnitaire.toString());
+        formData.append('prixEnGros', data.prixEnGros.toString());
         formData.append('paymentMethod', data.paymentMethod);
-        formData.append('unit', data.unit);
+        formData.append('unite', data.unite);
         formData.append('saleType', data.saleType);
-        formData.append('type_acteur', data.type_acteur);
-        formData.append('disponibleDe', data.availableStartDate);
-        formData.append('disponibleJusqua', data.availableEndDate);
+        formData.append('typeActeur', data.typeActeur);
+        formData.append('disponibleDe', data.disponibleDe);
+        formData.append('disponibleJusqua', data.disponibleJusqua);
         formData.append('decoupage', JSON.stringify(decoupage));
+        codeUsers && formData.append('codeUsers', codeUsers);
 
-        if (files['image']?.[0]) {
-            formData.append('image', files['image'][0]);
+        if (files['images']) {
+            formData.append('image', files['images'][0]);
+            
         }
 
         if (files['autre_images']) {
             files['autre_images'].forEach(file => {
-                formData.append('autre_images', file);
+                formData.append('autreImage', file);
             });
         }
 
-        console.log('🚀 FormData:');
-        for (const pair of formData.entries()) {
-            console.log(`${pair[0]}:`, pair[1]);
+        try {
+            const res = await createProduct(formData);
+            if (res.statusCode === 201) {
+                toast.success(res.message);
+                fechproductsByCode();
+                setActiveTab('liste');
+            } else {
+                toast.error(res.message);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la création du produit :', error);
         }
-
-
-        // try {
-        //     const res = await createProduct(formData);
-        //     if (res.statusCode === 201) {
-        //         toast.success(res.message);
-        //         getAllProducts();
-        //         onClose();
-        //     } else {
-        //         toast.error(res.message);
-        //         console.error('Erreur lors de la création du produit :', res.message);
-        //     }
-        // } catch (error) {
-        //     console.error('Erreur lors de la création du produit :', error);
-        //     toast.error('Erreur lors de la création du produit :', error);
-        // }
 
 
 
         // Tu peux ici envoyer `decoupage` avec `data`, ex. :
         // onSubmit({ ...data, decoupage });
     };
+
+    const allImages: string[] = initialValues?.allimages ?? [];
+
 
     return (
         <>
@@ -239,15 +252,15 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
 
                     <div>
                         <Label className="mb-2">Libellé de l’annonce *</Label>
-                        <Input {...register("libelle")} placeholder="Ex: Tomates fraîches du jour" className="w-full py-2" />
-                        {errors.libelle && <p className="text-red-500 text-sm">{errors.libelle.message}</p>}
+                        <Input {...register("nom")} placeholder="Ex: Tomates fraîches du jour" className="w-full py-2" />
+                        {errors.nom && <p className="text-red-500 text-sm">{errors.nom.message}</p>}
                     </div>
 
                     <div>
                         <Label className="mb-2">Type d'acteur *</Label>
                         <Controller
                             control={control}
-                            name="type_acteur"
+                            name="typeActeur"
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value || ""}>
                                     <SelectTrigger className="w-full">
@@ -261,7 +274,7 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
                                 </Select>
                             )}
                         />
-                        {errors.type_acteur && <p className="text-red-500 text-sm">{errors.type_acteur.message}</p>}
+                        {errors.typeActeur && <p className="text-red-500 text-sm">{errors.typeActeur.message}</p>}
                     </div>
 
                     <div>
@@ -289,7 +302,7 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
                         <Label className="mb-2">Unité *</Label>
                         <Controller
                             control={control}
-                            name="unit"
+                            name="unite"
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value || ""}>
                                     <SelectTrigger className="w-full">
@@ -303,19 +316,25 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
                                 </Select>
                             )}
                         />
-                        {errors.unit && <p className="text-red-500 text-sm">{errors.unit.message}</p>}
+                        {errors.unite && <p className="text-red-500 text-sm">{errors.unite.message}</p>}
                     </div>
 
                     <div>
                         <Label className="mb-2">Quantité *</Label>
-                        <Input type="number" {...register("quantity")} placeholder="Quantité" className="w-full" />
-                        {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity.message}</p>}
+                        <Input type="number" {...register("quantite")} placeholder="Quantité" className="w-full" />
+                        {errors.quantite && <p className="text-red-500 text-sm">{errors.quantite.message}</p>}
                     </div>
 
                     <div>
                         <Label className="mb-2">Prix unitaire *</Label>
-                        <Input type="number" {...register("price")} placeholder="Prix unitaire" className="w-full" />
-                        {errors.price && <p className="text-red-500 text-sm">{errors.price.message}</p>}
+                        <Input type="number" {...register("prixUnitaire")} placeholder="Prix unitaire" className="w-full" />
+                        {errors.prixUnitaire && <p className="text-red-500 text-sm">{errors.prixUnitaire.message}</p>}
+                    </div>
+
+                    <div>
+                        <Label className="mb-2">Prix en gros *</Label>
+                        <Input type="number" {...register("prixEnGros")} placeholder="Prix en gros" className="w-full" />
+                        {errors.prixEnGros && <p className="text-red-500 text-sm">{errors.prixEnGros.message}</p>}
                     </div>
 
                     <div>
@@ -341,14 +360,14 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
 
                     <div>
                         <Label className="mb-2">Date début *</Label>
-                        <Input type="date" {...register("availableStartDate")} className="w-full" />
-                        {errors.availableStartDate && <p className="text-red-500 text-sm">{errors.availableStartDate.message}</p>}
+                        <Input type="date" {...register("disponibleDe")} className="w-full" />
+                        {errors.disponibleDe && <p className="text-red-500 text-sm">{errors.disponibleDe.message}</p>}
                     </div>
 
                     <div>
-                        <Label className="mb-2">Date fin *</Label>
-                        <Input type="date" {...register("availableEndDate")} className="w-full" />
-                        {errors.availableEndDate && <p className="text-red-500 text-sm">{errors.availableEndDate.message}</p>}
+                        <Label className="mb-2">Date fin * </Label>
+                        <Input type="date" {...register("disponibleJusqua")} className="w-full" />
+                        {errors.disponibleJusqua && <p className="text-red-500 text-sm">{errors.disponibleJusqua.message}</p>}
                     </div>
 
                     <div className="md:col-span-2">
@@ -359,7 +378,45 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
 
                 </div>
 
+                <Card>
+                    <div className="flex flex-col md:flex-row md:space-x-8">
+                        {/* Image principale à gauche */}
+                        <div className="md:w-1/2">
+                            <CardHeader>
+                                <CardTitle>Image principale</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {initialValues?.imageUrl ? (
+                                    <div className="relative w-40 h-40 aspect-square rounded-md overflow-hidden">
+                                        <Image src={initialValues.imageUrl} alt="Image principale" fill  className="object-cover" loading="lazy" />
+                                    </div>
+                                ) : (
+                                    <p className="text-muted-foreground text-center">Aucune image principale disponible.</p>
+                                )}
+                            </CardContent>
+                        </div>
 
+                        {/* Autres images à droite */}
+                        <div className="mt-8 md:mt-0 md:w-1/2">
+                            <CardHeader>
+                                <CardTitle>Autres images</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {allImages.length > 0 ? (
+                                    <div className="flex flex-wrap justify-center gap-4">
+                                        {allImages.map((imageUrl, index) => (
+                                            <div key={index} className="w-24 h-24 relative rounded-md overflow-hidden">
+                                                <Image src={imageUrl}  alt={`Image ${index + 1}`} fill className="object-cover" loading="lazy" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-muted-foreground text-center">Aucune autre image disponible.</p>
+                                )}
+                            </CardContent>
+                        </div>
+                    </div>
+                </Card>
 
                 {/* Upload fichiers */}
                 <Card>
@@ -401,7 +458,7 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
                         className="w-full md:w-auto bg-gray-500 hover:bg-gray-600" >
                         Prévisualiser
                     </Button>
-                    <Button type="submit" disabled={!isValid} className="w-full md:w-auto" >
+                    <Button type="submit" disabled={!isValid} className="w-full md:w-auto bg-[#B07B5E]" >
                         {Object.keys(initialValues ?? {}).length > 0 ? "Mettre à jour le produit" : "Publier le produit"}
                     </Button>
                 </div>
@@ -412,14 +469,14 @@ export default function ProductForm({ initialValues, userEnrollementData }: Prod
                 <div className="mt-6 border p-4 rounded-md shadow bg-white">
                     <h2 className="text-lg font-bold mb-4">Résumé de l’annonce</h2>
                     <ul className="space-y-2 text-sm">
-                        <li><strong>Libellé:</strong> {previewData.libelle}</li>
-                        <li><strong>Type d’acteur:</strong> {previewData.type_acteur}</li>
+                        <li><strong>Libellé:</strong> {previewData.nom}</li>
+                        <li><strong>Type d’acteur:</strong> {previewData.typeActeur}</li>
                         <li><strong>Type de vente:</strong> {previewData.saleType}</li>
                         <li><strong>Méthode de paiement:</strong> {previewData.paymentMethod}</li>
-                        <li><strong>Unité:</strong> {previewData.unit}</li>
-                        <li><strong>Quantité:</strong> {previewData.quantity}</li>
-                        <li><strong>Prix unitaire:</strong> {previewData.price}</li>
-                        <li><strong>Disponibilité:</strong> du {previewData.availableStartDate} au {previewData.availableEndDate}</li>
+                        <li><strong>Unité:</strong> {previewData.unite}</li>
+                        <li><strong>Quantité:</strong> {previewData.quantite}</li>
+                        <li><strong>Prix unitaire:</strong> {previewData.prixUnitaire}</li>
+                        <li><strong>Disponibilité:</strong> du {previewData.disponibleDe} au {previewData.disponibleJusqua}</li>
                         <li><strong>Description:</strong> {previewData.description}</li>
                         {/* <li><strong>Localisation:</strong> {Object.values(decoupage).join(" > ")}</li> */}
                     </ul>

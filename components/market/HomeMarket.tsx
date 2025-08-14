@@ -11,6 +11,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import ProductLoader from './ProductLoader';
 import { useRouter } from "next/navigation";
+import { getAllProductsWithStatusOne } from '@/api/services/productServices';
 
 // Fake data
 const products: Product[] = Array.from({ length: 8 }).map((_, i) => ({
@@ -60,6 +61,35 @@ export default function HomeMarket() {
 
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [limit] = useState(8);
+    const router = useRouter();
+
+    const getAllProductsWithStatus = async () => {
+        try {
+
+            setIsLoading(true);
+            const res = await getAllProductsWithStatusOne(currentPage, limit);
+            if (res.statusCode === 200 && res.data) {
+                setProducts(res.data.data);
+                setTotalItems(res.data.total);
+                setCurrentPage(res.data.page);
+                setIsLoading(false);
+            } else {
+                setProducts([]);
+                setIsLoading(false);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    useEffect(() => {
+        getAllProductsWithStatus();
+    }, [currentPage]);
+
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('fr-FR').format(price);
@@ -85,63 +115,79 @@ export default function HomeMarket() {
         return () => clearTimeout(timer);
     }, []);
 
+
+    const isDataEmpty = !isLoading && products.length === 0;
+
+
     return (
-        // <div className="w-full py-50 mt-5 lg:py-2 bg-gray-500">
+        <div className="md:container md:mx-auto mt-5">
+            {isLoading ? (
 
-            <div className="md:container md:mx-auto mt-5">
-                {isLoading ? (
-                    <ProductLoader />
-                ) : (
-                    <>
-                        <div className="flex flex-col items-start px-1">
-                            <div className="flex gap-2 flex-col mb-4">
-                                <h2 className="text-3xl md:text-2xl  tracking-tighter max-w-xl font-bold text-left">
-                                    Des produits frais
-                                </h2>
-                            </div>
+                <ProductLoader />
+
+            ) : isDataEmpty ? (
+
+                <div className="flex flex-col items-center justify-center mt-10 text-center">
+                    <Image
+                        src="/error.svg"
+                        alt="Aucune donnée"
+                        width={180}
+                        height={180}
+                    />
+                    <p className="mt-4 text-gray-600 text-sm">Aucune donnée trouvée</p>
+                </div>
+            ) : (
+                <>
+                    <div className="flex flex-col items-start px-1">
+                        <div className="flex gap-2 flex-col mb-4">
+                            <h2 className="text-3xl md:text-2xl  tracking-tighter max-w-xl font-bold text-left">
+                                Des produits frais
+                            </h2>
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
-                            {products.map((product) => (
-                                <div key={product.id} className="flex flex-col gap-2 cursor-pointer">
-                                    <Link href={`/show/${product.id}`} passHref>
-                                        <div className="relative w-full bg-muted rounded-md aspect-video mb-1 overflow-hidden w-full h-32 md:h-40">
-                                            <Image src={product.imageUrl || "/astronaut-grey-scale.svg"} alt={product.nom} className="object-cover rounded-md" fill />
-                                            <div className="absolute top-2 right-2">
-                                                <Badge variant="secondary" className="text-xs px-2 py-1 bg-black/60 text-white">
-                                                    {product.saleType}
-                                                </Badge>
-                                            </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
+                        {products.map((product) => (
+                            <div key={product.id} className="flex flex-col gap-2 cursor-pointer">
+                                <Link href={`/show/${product.id}`} passHref>
+                                    <div className="relative w-full bg-muted rounded-md aspect-video mb-1 overflow-hidden w-full h-32 md:h-40">
+                                        <Image src={product.imageUrl || "/astronaut-grey-scale.svg"} alt={product.nom} className="object-cover rounded-md" fill />
+                                        <div className="absolute top-2 right-2">
+                                            <Badge variant="secondary" className="text-xs px-2 py-1 bg-[#B07B5E] text-white">
+                                                {product.saleType}
+                                            </Badge>
                                         </div>
-                                        <div className="p-3 text-sm">
-                                            <p className="bg-muted font-bold text-[11px] py-[2px] px-2 rounded-md w-fit text-gray-700 w-full">
-                                                {product.decoupage.region.nom} - {product.decoupage.localite.nom}
-                                            </p>
-                                            <p className="font-bold text-lime-800 uppercase leading-tight ">{product.nom}</p>
-                                            <p className="text-gray-600 text-xs leading-tight mb-1 truncate">{product.description || 'BLANC'}</p>
-                                            <p className="text-[13px] font-medium">💵 {formatPrice(product.prixUnitaire)} F CFA / {product.unite}</p>
-                                            <p className="text-xs text-muted-foreground mb-1">📦 {product.quantite} {product.unite}</p>
-                                            <p className="text-[10px] text-gray-500 font-mono">{product.code}</p>
-                                            <p className="text-[10px] text-gray-400 mb-1">Publié {formatDate(product.createdAt)} </p>
-                                            {/* <Button className='leading-tight truncate w-full mt-2 border-none bg-muted hover:bg-[#022d13] hover:text-white uppercase' variant="outline">
+                                    </div>
+                                    <div className="p-3 text-sm">
+                                        <p className="bg-muted font-bold text-[11px] py-[2px] px-2 rounded-md w-fit text-gray-700 w-full">
+                                            {product.decoupage.region.nom} - {product.decoupage.localite.nom}
+                                        </p>
+                                        <p className="font-bold text-lime-800 uppercase leading-tight ">{product.nom}</p>
+                                        <p className="text-gray-600 text-xs leading-tight mb-1 truncate">{product.description || 'BLANC'}</p>
+                                        <p className="text-[13px] font-medium">💵 {formatPrice(product.prixUnitaire)} F CFA / {product.unite}</p>
+                                        <p className="text-xs text-muted-foreground mb-1">📦 {product.quantite} {product.unite}</p>
+                                        <p className="text-[10px] text-gray-500 font-mono">{product.code}</p>
+                                        <p className="text-[10px] text-gray-400 mb-1">Publié {formatDate(product.createdAt)} </p>
+                                        {/* <Button className='leading-tight truncate w-full mt-2 border-none bg-muted hover:bg-[#022d13] hover:text-white uppercase' variant="outline">
                                                 Consulter ...<ArrowRight size={16} />
                                             </Button> */}
-                                        </div>
-                                    </Link>
-                                </div>
-                            ))}
-                        </div>
+                                    </div>
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
 
-                        {/* Bouton "Consulter plus de produits" */}
-                        <div className="w-full flex justify-center mt-10">
-                            <Button  className="gap-2 text-sm md:text-base bg-gray-100 text-black">
-                                Voir plus ...
-                                <ArrowRight size={16} />
-                            </Button>
-                        </div>
-                    </>
-                )}
-            </div>
-        // </div>
+                    {/* Bouton "Consulter plus de produits" */}
+                    <div className="w-full flex justify-center mt-10">
+                        {/* sela doit ettre une fonction qui contui vert la page place-du marche */}
+                        <Button onClick={() => router.push('/market-place')} className="gap-2 text-sm md:text-base bg-[#B07B5E] text-white hover:bg-[#022d13] hover:text-white">
+                            Voir plus ...
+                            <ArrowRight size={16} />
+                        </Button>
+                    </div>
+
+                </>
+            )}
+        </div>
     );
 }

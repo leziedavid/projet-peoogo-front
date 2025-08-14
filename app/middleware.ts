@@ -91,6 +91,25 @@ export const useAuthMiddleware = async (): Promise<DecodedToken | null> => {
     return jwtDecode<DecodedToken>(token) // Decode et retourne les infos utilisateur
 }
 
+
+export const useAuthMiddlewareOne = async (): Promise<DecodedToken | null> => {
+    // Fonction principale qui contrôle l’authentification et rafraîchit le token si besoin
+    let token = getTokenFromLocalStorage() // Récupère le token actuel
+
+    if (!token || !isTokenValid(token)) {
+        // Si pas de token ou token invalide
+        const newToken = await tryRefreshAccessToken() // Tente de rafraîchir
+        if (!newToken || !isTokenValid(newToken)) {
+            // Si échec rafraîchissement ou token toujours invalide
+            localStorage.removeItem('access_token') // Supprime tokens
+            localStorage.removeItem('refresh_token')
+            return null
+        }
+        token = newToken // Sinon, utilise le nouveau token
+    }
+    return jwtDecode<DecodedToken>(token) // Decode et retourne les infos utilisateur
+}
+
 export const getUserId = async (): Promise<string | null> => {
     // Récupère l'ID utilisateur depuis le token décodé
     const user = await useAuthMiddleware()
@@ -114,7 +133,7 @@ export const getUserAccountNumber = async (): Promise<string | null> => {
 
 export const getUserRole = async (): Promise<Role | null> => {
     // Récupère le rôle utilisateur depuis le token décodé
-    const user = await useAuthMiddleware()
+    const user = await useAuthMiddlewareOne()
     return user?.role ?? null
 }
 
@@ -126,13 +145,13 @@ export const getUserStatus = async (): Promise<UserStatus | null> => {
 
 export const getUserImageUrl = async (): Promise<string | null> => {
     // Récupère l'URL de l'image utilisateur depuis le token décodé
-    const user = await useAuthMiddleware()
+    const user = await useAuthMiddlewareOne()
     return user?.imageUrl ?? null
 }
 
 export const getUserName = async (): Promise<string | null> => {
     // Récupère le nom de l'utilisateur depuis le token décodé
-    const user = await useAuthMiddleware()
+    const user = await useAuthMiddlewareOne()
     return user?.name ?? null
 }
 
@@ -158,7 +177,6 @@ export const isUserAuthenticated = async (): Promise<boolean> => {
     }
     return true
 }
-
 
 export const logout = (): void => {
     // Fonction de déconnexion qui supprime les tokens et redirige vers login

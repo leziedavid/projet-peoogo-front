@@ -4,17 +4,20 @@ import { Decoupage, TypeCompte } from "./EnrollementRequest";
 
 
 export interface ProductsRequest {
-    libelle: string;
+    nom: string;
     paymentMethod: string;
-    unit: string;
-    quantity: number;
-    price: number;
+    unite: string;
+    quantite: number;
+    prixUnitaire: number;
+    prixEnGros: number;
     saleType: string;
-    type_acteur: TypeCompte; // ou string si ce n’est pas encore strictement typé
-    availableStartDate: string; // Format ISO ou format YYYY-MM-DD
-    availableEndDate: string;   // idem
+    typeActeur: TypeCompte; // ou string si ce n’est pas encore strictement typé
+    disponibleDe: string; // Format ISO ou format YYYY-MM-DD
+    disponibleJusqua: string;   // idem
     description: string;
     images?: File;         // ⬅️ maintenant optionnel
     autre_images?: File;   // ⬅️ maintenant optionnel
     decoupage: Decoupage;
+    imageUrl?: string;
+    allimages?: string[];
 }

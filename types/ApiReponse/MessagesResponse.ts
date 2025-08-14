@@ -13,6 +13,7 @@ export interface MessagesResponse {
 export interface Message {
     id: string;
     text: string | null;
+    label: string | null;
     imageUrl: string | null;
     timestamp: string; // ISO date string
     sender: string; // ex: "user"

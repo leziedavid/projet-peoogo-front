@@ -7,25 +7,27 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, SkipBack, SkipForward, RefreshCw, Phone, FolderCheck, Folder, FolderX } from 'lucide-react';
-import { controlEnrollement, getAllPaginate, updateEnrollementPartialData } from '@/api/services/enrollementsServices';
-import { EnrollementData } from '@/types/ApiReponse/enrollementControleResponse';
+import { CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, SkipBack, SkipForward, RefreshCw, Phone, FolderCheck, Folder, FolderX, StretchHorizontal, SwatchBook, Heart, ShoppingCart } from 'lucide-react';
+import { controlEnrollement, getAllPaginate, getStatistiquesControle, updateEnrollementPartialData } from '@/api/services/enrollementsServices';
+import { ControlStatsResponse, EnrollementData } from '@/types/ApiReponse/enrollementControleResponse';
 import { formatDateHeureFr } from '@/app/util/dataFormat';
 import Image from 'next/image';
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, } from "@/components/ui/carousel"
 import { toast } from 'sonner';
 
-const DEFAULT_IMAGE_URL = '/IMG_5195.png';
-// const DEFAULT_IMAGE_URL = '/icon_default.svg';
-// const DEFAULT_IMAGE_URL = '/users.jpg';
+const DEFAULT_IMAGE_URL = '/photos_09.svg';
+const DEFAULT_IMAGE_VERSO = '/documents.png';
+const DEFAULT_IMAGE_RECTO = '/documents.png';
+
 export default function ControleQualite() {
     const [lot, setLot] = useState<EnrollementData[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [currentRecord, setCurrentRecord] = useState<EnrollementData | null>(null);
     const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
-    const [stats, setStats] = useState({ valide: 0, en_attente: 0, rejete: 0 });
+    const [stats, setStats] = useState({} as ControlStatsResponse);
+    const [numero_lot, setNumeroLot] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         nom: '',
@@ -65,7 +67,10 @@ export default function ControleQualite() {
             try {
                 const res = await getAllPaginate(1, 50);
                 if (res.data?.data?.length) {
+                    // getStatistiquesControle
+                    getControlStats(res.data.numero_lot);
                     setLot(res.data.data);
+                    setNumeroLot(res.data.numero_lot);
                     setCurrentIndex(0);
                     setStatus(res.data.data[0].status_dossier || res.data.data[0].status_dossier || '');
                 } else {
@@ -138,7 +143,10 @@ export default function ControleQualite() {
         try {
             const res = await getAllPaginate(1, 100);
             if (res.data?.data?.length) {
+                // getStatistiquesControle
+                getControlStats(res.data.numero_lot);
                 setLot(res.data.data);
+                setNumeroLot(res.data.numero_lot);
                 setCurrentIndex(0);
                 setStatus(res.data.data[0].status_dossier || res.data.data[0].status_dossier || '');
             }
@@ -150,16 +158,25 @@ export default function ControleQualite() {
         }
     };
 
+
+    const getControlStats = async (numero_lot: string | null) => {
+        if (!numero_lot) return;
+        const res = await getStatistiquesControle(numero_lot);
+        if (res.statusCode === 200) {
+            setStats(res.data);
+        }
+    };
+
     const handleChange = (field: any, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-const handleSubmit = async () => {
+    const handleSubmit = async () => {
 
-    if (!currentRecord) return;
-    setLoading(true);
+        if (!currentRecord) return;
+        setLoading(true);
 
-    console.log('sexe:', formData.sexe);
+        console.log('sexe:', formData.sexe);
         const payload = {
             sexe: formData.sexe,
             status_dossier: status,
@@ -167,19 +184,19 @@ const handleSubmit = async () => {
             numeroLot: formData.numero_lot,
         };
         const res = await controlEnrollement(currentRecord.id, payload);
-        
+
         if (res.statusCode === 200) {
             toast.success(res.message);
             handleRefresh();
             setLoading(false);
 
-        }else {
+        } else {
             console.error('Erreur lors du contrôle:', res.message);
             toast.error(res.message);
             setLoading(false);
         }
 
-};
+    };
 
 
     const handleSkip = () => {
@@ -198,9 +215,9 @@ const handleSubmit = async () => {
     const photoUrl = currentRecord.photo || DEFAULT_IMAGE_URL;
 
     const images: string[] = [
-        currentRecord.photo || DEFAULT_IMAGE_URL,
-        currentRecord.document1 || DEFAULT_IMAGE_URL,
-        currentRecord.document2 || DEFAULT_IMAGE_URL,
+        // currentRecord.photo || DEFAULT_IMAGE_URL,
+        currentRecord.document1 || DEFAULT_IMAGE_VERSO,
+        currentRecord.document2 || DEFAULT_IMAGE_RECTO,
     ];
 
     const getStatusBadgeColor = (status: string) => {
@@ -234,7 +251,7 @@ const handleSubmit = async () => {
             <div className="flex items-center justify-between bg-gray-100 p-3 rounded-md">
                 <div>
                     <p className="text-sm">N° de lot:</p>
-                    <p className="font-semibold text-lg">1753263164</p>
+                    <p className="font-semibold text-lg">{numero_lot}</p>
                 </div>
 
                 <div className="flex gap-2 items-center space-x-2">
@@ -256,42 +273,50 @@ const handleSubmit = async () => {
                     <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
-                    <Button className="bg-teal-600 hover:bg-teal-700">
+                    <Button className="bg-[#B07B5E] hover:bg-teal-700">
                         Terminer
                     </Button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <Card className="bg-green-100 border border-green-400">
-                    <CardContent className="flex items-center justify-between p-4">
-                        <div>
-                            <p className="text-sm text-green-900">Dossier(s) validé(s)</p>
-                            <p className="text-2xl font-bold text-green-900">0</p>
-                        </div>
-                        <FolderCheck className="text-green-700 w-10 h-10" />
-                    </CardContent>
-                </Card>
+            <div className="dark:bg-gray-800">
 
-                <Card className="bg-yellow-100 border border-yellow-400">
-                    <CardContent className="flex items-center justify-between p-4">
-                        <div>
-                            <p className="text-sm text-yellow-900">Dossier(s) non traité(s)</p>
-                            <p className="text-2xl font-bold text-yellow-900">0</p>
-                        </div>
-                        <Folder className="text-yellow-700 w-10 h-10" />
-                    </CardContent>
-                </Card>
+                <div className="col-span-3 md:col-span-2 flex flex-col items-center md:items-start gap-4 pt-1 px-2">
 
-                <Card className="bg-red-100 border border-red-400">
-                    <CardContent className="flex items-center justify-between p-4">
-                        <div>
-                            <p className="text-sm text-red-900">Dossier(s) rejeté(s)</p>
-                            <p className="text-2xl font-bold text-red-900">0</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-8 pt-4 mx-auto  w-full">
+
+                        <div title="component views"
+                            className="md:col-start-2 lg:col-auto flex flex-col justify-center items-center gap-2 border-2 border-dashed border-gray-500/50 p-4 rounded-md h-32 dark:text-gray-200">
+                            <div className="flex gap-2 items-center">
+                                <span className="font-bold text-xl md:text-1xl"> {stats?.val || 0} </span>
+                                <FolderCheck className="w-6 h-6" />
+
+                            </div>
+                            <span className="font-semibold text-sm text-center"> Dossier(s) validé(s)</span>
                         </div>
-                        <FolderX className="text-red-700 w-10 h-10" />
-                    </CardContent>
-                </Card>
+
+                        <div title="All contributed components"
+                            className="flex flex-col justify-center items-center gap-2 border-2 border-dashed border-gray-500/50 p-4 rounded-md h-32 dark:text-gray-200">
+                            <div className="flex gap-2 items-center">
+                                <span className="font-bold text-xl md:text-1xl">{stats?.non_traite || 0} </span>
+                                <Folder className="w-6 h-6" />
+                            </div>
+                            <span className="font-semibold text-sm text-center">Dossier(s) non traité(s)</span>
+                        </div>
+
+                        <div title="Users got help"
+                            className="flex flex-col justify-center items-center gap-2 border-2 border-dashed border-gray-500/50 p-4 rounded-md h-32 dark:text-gray-200">
+                            <div className="flex gap-2 items-center">
+                                <span className="font-bold text-xl md:text-1xl">{stats?.rej || 0} </span>
+                                <FolderX className="w-6 h-6" />
+                            </div>
+                            <span className="font-semibold text-sm text-center">Dossier(s) rejeté(s)</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
             <div className="mt-6">
@@ -363,11 +388,11 @@ const handleSubmit = async () => {
                             <div className="flex-1 bg-gray-100 rounded-lg border-1 border-orange-300 overflow-hidden">
                                 {currentRecord.photo ? (
                                     <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full "/>
+                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full " />
                                     </div>
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full "/>
+                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full " />
                                     </div>
                                 )}
                             </div>
@@ -511,7 +536,7 @@ const handleSubmit = async () => {
                                     <Label htmlFor="status" className="text-sm font-medium">Statut</Label>
                                     <Select
                                         value={status}
-                                        onValueChange={(value) => { setStatus(value); handleChange('status_dossier', value);  }} >
+                                        onValueChange={(value) => { setStatus(value); handleChange('status_dossier', value); }} >
                                         <SelectTrigger className="mt-1 w-full h-10">
                                             <SelectValue placeholder="Choisissez un statut pour ce dossier"
                                                 // 🔥 On précise le label à afficher
@@ -542,7 +567,7 @@ const handleSubmit = async () => {
 
                             {/* Boutons toujours en bas */}
                             <div className="flex space-x-2 pt-4 mt-auto">
-                                <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={handleSubmit} disabled={loading || !status} >
+                                <Button className="flex-1 bg-[#B07B5E] hover:bg-teal-700" onClick={handleSubmit} disabled={loading || !status} >
                                     {loading ? 'Traitement...' : 'Soumettre'}
                                 </Button>
 

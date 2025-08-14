@@ -48,18 +48,13 @@ export function SelectMultipleWithSearch({
 
     return (
         <div className="space-y-2">
-            <Select onValueChange={handleAdd} disabled={disabled}>
+            <Select onValueChange={handleAdd} disabled={disabled} >
                 <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
                     <div className="p-2">
-                        <Input
-                            type="text"
-                            placeholder="Rechercher..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full px-2 py-1 border rounded text-sm"
+                        <Input type="text" placeholder="Rechercher..."  value={search} onChange={(e) => setSearch(e.target.value)} className="w-full px-2 py-1 border rounded text-sm"
                         />
                     </div>
                     {filteredOptions.map((opt) => (

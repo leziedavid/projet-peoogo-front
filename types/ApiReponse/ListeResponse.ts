@@ -35,6 +35,7 @@ export interface RegionResponse {
 export interface DepartmentResponse {
     id: string;
     nom: string;
+    statut: boolean;
     regionId: string;
     region: RegionResponse;
 }
@@ -43,6 +44,7 @@ export interface DepartmentResponse {
 export interface SousPrefectureResponse {
     id: string;
     nom: string;
+    statut: boolean;
     departmentId: string;
     department: DepartmentResponse;
 }
@@ -51,7 +53,7 @@ export interface SousPrefectureResponse {
 export interface LocaliteResponse {
     id: string;
     nom: string;
-    statut:string;
+    statut: boolean;
     sousPrefectureId: string;
     sousPrefecture: SousPrefectureResponse;
 }

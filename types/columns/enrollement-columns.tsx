@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { EnrollementData } from "../ApiReponse/enrollementControleResponse"; // adapte le chemin selon ton projet
+import { EnrollementData } from "../ApiReponse/enrollementControleResponse";
 
 // Pour les colonnes de tableau des enrôlements
 export const columns: ColumnDef<EnrollementData>[] = [

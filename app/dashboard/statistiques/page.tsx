@@ -16,6 +16,8 @@ import { fa } from 'zod/v4/locales';
 import { EnrollementStatByDate, GeoCoord } from '@/types/ApiReponse/StatistiquesEnrollementResponse';
 import EnrollementGraph from '@/components/chart/EnrollementGraph';
 import EnrollementMap from '@/components/chart/EnrollementMap.client';
+import { toast } from "sonner";
+
 
 const DEFAULT_IMAGE_URL = '/IMG_5195.png';
 
@@ -23,7 +25,7 @@ export default function Page() {
     const [listes, setListes] = useState<EnrollementData[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [limit] = useState(10);
+    const [limit] = useState(5);
     const [loading, setLoading] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [InitialValue, setInitialValues] = useState<EnrollementData | undefined>(undefined);
@@ -108,35 +110,6 @@ export default function Page() {
         }
     };
 
-    // const searchData = async (filter: FilterRequest): Promise<void> => {
-    //     setLoading(true);
-
-    //     try {
-    //         console.log('Filtre appliqué:', filter);
-    //         switch (filter.modeAffichage) {
-    //             case 'carte':
-    //                 fetchefilterEnrollementsmodeCarte(filter);
-    //                 break;
-    //             case 'graphique':
-    //                 fetchefilterEnrollementsmodeGraphique(filter);
-    //                 break;
-
-    //             case 'tableau':
-    //                 fetchefilterEnrollementsTableau(filter);
-
-    //             default:
-    //                 filter.modeAffichage = 'tableau';
-    //                 fetchefilterEnrollementsTableau(filter);
-    //                 break;
-    //         }
-
-    //     } catch (error) {
-    //         console.error('Erreur lors de la recherche:', error);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     const fetchEnrollements = async (page: number, limit: number) => {
 
         setLoading(true);
@@ -182,11 +155,12 @@ export default function Page() {
 
     }
 
+
     function handleNextPage() {
         if (currentPage < Math.ceil(totalItems / limit)) {
             setCurrentPage(currentPage + 1);
         } else {
-            alert("Vous êtes déjà sur la dernière page.");
+            toast.error("Vous êtes déjà sur la dernière page.");
         }
     }
 
@@ -194,7 +168,7 @@ export default function Page() {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
         } else {
-            alert("Vous êtes déjà sur la première page.");
+            toast.error("Vous êtes déjà sur la première page.");
         }
     }
 
@@ -206,49 +180,54 @@ export default function Page() {
 
             <SearchFilter onFilter={searchData} />
 
-                {loading ? (
+            {loading ? (
 
-                    <DataTableSkeleton columnCount={5} rowCount={10} />
+                <DataTableSkeleton columnCount={5} rowCount={10} />
 
-                ) : isDataEmpty ? (
+            ) : isDataEmpty ? (
 
-                    <div className="flex flex-col items-center justify-center mt-10 text-center">
-                        <Image
-                            src="/error.svg"
-                            alt="Aucune donnée"
-                            width={180}
-                            height={180}
-                        />
-                        <p className="mt-4 text-gray-600 text-sm">Aucune donnée trouvée</p>
-                    </div>
+                <div className="flex flex-col items-center justify-center mt-10 text-center">
+                    <Image
+                        src="/error.svg"
+                        alt="Aucune donnée"
+                        width={180}
+                        height={180}
+                    />
+                    <p className="mt-4 text-gray-600 text-sm">Aucune donnée trouvée</p>
+                </div>
 
-                ) : (
+            ) : (
 
                 <>
-                            <div className='mt-4'>
-                                <h3 className="text-lg font-semibold">Résultats de la recherche</h3>
-                                <p className="text-sm text-gray-600">{listes.length} résultats trouvés</p>
-                            </div>
+                    <div className='mt-4'>
+                        <h3 className="text-lg font-semibold">Résultats de la recherche</h3>
+                        <p className="text-sm text-gray-600">{listes.length} résultats trouvés</p>
+                    </div>
 
-                            {modeAffichage === 'tableau' && (
-                                <DataTable
-                                    columns={enrollementColumns}
-                                    data={listes}
-                                    onChangeState={handleChangeState}
-                                    onUpdateData={handleUpdate}
-                                    onDeleteData={handleDelete}
-                                    onNextPage={handleNextPage}
-                                    onPreviousPage={handlePreviousPage}
-                                />
-                            )}
+                    {modeAffichage === 'tableau' && (
 
-                            {modeAffichage === 'graphique' && (
-                                <EnrollementGraph data={resultsGraphique} />
-                            )}
+                        <DataTable
+                            columns={enrollementColumns}
+                            data={listes}
+                            onChangeState={handleChangeState}
+                            onUpdateData={handleUpdate}
+                            onNextPage={handleNextPage}
+                            onPreviousPage={handlePreviousPage}
+                            currentPage={currentPage}
+                            totalItems={totalItems}
+                            itemsPerPage={limit}
+                        />
 
-                            {modeAffichage === 'carte' && (
-                                <EnrollementMap data={resultsCarte} />
-                            )}
+            
+                    )}
+
+                    {modeAffichage === 'graphique' && (
+                        <EnrollementGraph data={resultsGraphique} />
+                    )}
+
+                    {modeAffichage === 'carte' && (
+                        <EnrollementMap data={resultsCarte} />
+                    )}
                 </>
 
             )}

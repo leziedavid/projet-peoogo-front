@@ -22,11 +22,28 @@ export const signIn = async (loginData: Partial<LoginDto>): Promise<BaseResponse
     }
 }
 
-export const refreshAccessToken = async ( refreshToken: string ): Promise<BaseResponse<RefreshTokenResponse>> => {
-    
+// Connexion : accepte email OU phoneNumber
+export const loginByPhoneCode = async (loginData: any): Promise<BaseResponse<UserAuth>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/auth/login/by/code/or/phone`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(loginData),
+        })
+
+        return await response.json()
+    } catch (error) {
+        toast.error("Erreur réseau ou serveur.");
+        throw error
+    }
+}
+
+export const refreshAccessToken = async (refreshToken: string): Promise<BaseResponse<RefreshTokenResponse>> => {
+
     try {
 
-        const response = await fetch(`${getBaseUrl()}/auth/refresh`, { method: 'POST',
+        const response = await fetch(`${getBaseUrl()}/auth/refresh`, {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refresh_token: refreshToken }),
         })
@@ -56,9 +73,22 @@ export const signUp = async (registerData: FormData): Promise<BaseResponse<any>>
     }
 }
 
+export const updateUser = async (id: string, formData: FormData): Promise<BaseResponse<any>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/auth/update/${id}`, {
+            method: 'PATCH',
+            body: formData,
+        });
+        return await response.json()
+    } catch (error) {
+        toast.error("Erreur réseau ou serveur.");
+        throw error
+    }
+}
+
 
 // ajouter un utilisateur par un partenaire
-    export const addDriverByPartner = async (registerData: FormData): Promise<BaseResponse<any>> => {
+export const addDriverByPartner = async (registerData: FormData): Promise<BaseResponse<any>> => {
     try {
         // Récupération de l'ID utilisateur (partnerId)
         const userId = await getUserId();
@@ -78,7 +108,7 @@ export const signUp = async (registerData: FormData): Promise<BaseResponse<any>>
 
         return await response.json()
 
-        
+
     } catch (error: any) {
 
         toast.error("Erreur réseau ou serveur.");

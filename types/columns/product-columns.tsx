@@ -6,9 +6,22 @@ import { Product } from '../ApiReponse/ProduitsResponse';
 import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { PeriodeDisponibiliteCell } from './PeriodeDisponibiliteCell';
+import { QuantiteCell } from './QuantiteCell';
+
+
+function calculerStatutProduit(disponibleDe: string, disponibleJusqua: string): 'disponible' | 'indisponible' {
+    const maintenant = new Date();
+    const debut = new Date(disponibleDe);
+    const fin = new Date(disponibleJusqua);
+
+    return maintenant >= debut && maintenant <= fin ? 'disponible' : 'indisponible';
+}
+
 
 // 📦 API de mise à jour du status (à adapter selon ton service réel)
 const updateProductStatus = async (id: string, newStatus: 'ACTIVE' | 'INACTIVE') => {
+
     try {
         console.log(`Produit ${id} mis à jour vers le statut : ${newStatus}`);
         // await tonService.updateStatus(id, newStatus);
@@ -32,11 +45,7 @@ const ProductStatusSwitch: React.FC<{ row: any }> = ({ row }) => {
 
     return (
         <div className="flex items-center space-x-2">
-            <Switch
-                checked={checked}
-                onCheckedChange={handleToggle}
-                id={`statut-${id}`}
-            />
+            <Switch checked={checked} onCheckedChange={handleToggle} id={`statut-${id}`} />
             <Label htmlFor={`statut-${id}`} className="text-xs">
                 {checked ? "Publié" : "En attente"}
             </Label>
@@ -45,6 +54,7 @@ const ProductStatusSwitch: React.FC<{ row: any }> = ({ row }) => {
 };
 
 export const columns: ColumnDef<Product>[] = [
+
     {
         accessorKey: 'imageUrl',
         header: 'Image',
@@ -69,6 +79,22 @@ export const columns: ColumnDef<Product>[] = [
             );
         }
     },
+    // nom du producteur et code
+
+    {
+        header: 'Nom du producteur',
+        cell: ({ row }) => {
+            const d = row.original.userInfo;
+            return (
+                <div className="text-sm leading-tight space-y-1">
+                    <div> <strong>Nom :</strong> {d.name}</div>
+                    <div> <strong>code :</strong> {d.code} </div>
+                    <div> <strong>Téléphone :</strong> {d.phoneNumber} </div>
+                </div>
+            );
+        }
+    },
+
     {
         accessorKey: 'nom',
         header: 'Nom du produit',
@@ -79,8 +105,14 @@ export const columns: ColumnDef<Product>[] = [
         cell: ({ row }) => <span className="uppercase">{row.getValue('code')}</span>
     },
     {
+        header: 'Période de disponibilité',
+        cell: ({ row }) => <PeriodeDisponibiliteCell row={row} />
+    }
+    ,
+    {
         accessorKey: 'quantite',
         header: 'Quantité',
+        cell: ({ row }) => <QuantiteCell row={row} />
     },
     {
         accessorKey: 'prixUnitaire',
@@ -109,16 +141,19 @@ export const columns: ColumnDef<Product>[] = [
         }
     },
     {
-        accessorKey: 'statut',
         header: 'Statut',
         cell: ({ row }) => {
-            const statut = row.original.statut;
-            // Map custom colors to allowed Badge variants
+            const disponibleDe = row.original.disponibleDe;
+            const disponibleJusqua = row.original.disponibleJusqua;
+            const statut = calculerStatutProduit(disponibleDe, disponibleJusqua);
+
             const variant =
-                statut === 'disponible' ? 'default' : statut === 'indisponible' ? 'destructive' : 'secondary';
-            return <Badge variant={variant}>{statut || 'en attente'}</Badge>;
+                statut === 'disponible' ? 'default' : 'destructive';
+
+            return <Badge variant={variant}>{statut}</Badge>;
         }
     },
+
     {
         id: 'switch-status',
         header: 'Status',

@@ -9,6 +9,9 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { Menu, MoveRight, X } from "lucide-react";
 import { useCart } from '@/app/context/CartProvider';
 import SideCart from '../SideCart';
+import { getUserName, getUserRole, isSessionStillValid, logout } from '@/app/middleware';
+import { useRouter } from 'next/navigation'
+
 
 // Composant Header principal
 const HeaderMarket: React.FC = ({ }) => {
@@ -16,6 +19,10 @@ const HeaderMarket: React.FC = ({ }) => {
     const { countAllItems } = useCart();
     const [showSideCart, setShowSideCart] = useState(false);
     const cartItems = countAllItems();
+    const [UserName, setUserName] = useState("");
+    const [UserRole, setUserRole] = useState("");
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const router = useRouter();
 
     const notifications = [
         {
@@ -46,29 +53,63 @@ const HeaderMarket: React.FC = ({ }) => {
             title: "Accueil",
             href: "/",
             description: "",
-            icon: <LucideHome className="w-4 h-4 mr-2" /> // Icône pour ACCUEIL
+            icon: <LucideHome className="w-4 h-4 mr-2 text-[#B07B5E]" /> // Icône pour ACCUEIL
         },
         {
             title: "Marché",
             href: "/market-place",
             description: "",
-            icon: <Store className="w-4 h-4 mr-2" /> // Icône pour PRODUITS
+            icon: <Store className="w-4 h-4 mr-2  text-[#B07B5E]" /> // Icône pour PRODUITS
         },
         {
             title: "Prix du marché",
-            href: "/Prix-du-marche",
+            href: "/prix-du-marche",
             description: "",
-            icon: <HandCoins className="w-4 h-4 mr-2" /> // Icône pour REALISATIONS
+            icon: <HandCoins className="w-4 h-4 mr-2  text-[#B07B5E]" /> // Icône pour REALISATIONS
         },
         {
             title: "Aide et Assistance",
-            href: "/apropos",
+            href: "/aide-assistance",
             description: "",
-            icon: <LucideInfo className="w-4 h-4 mr-2" /> // Icône pour A PROPOS
+            icon: <LucideInfo className="w-4 h-4 mr-2  text-[#B07B5E]" /> // Icône pour A PROPOS
         },
+        // about
+        {
+            title: "À propos",
+            href: "/about",
+            description: "",
+            icon: <LucideInfo className="w-4 h-4 mr-2  text-[#B07B5E]" /> // Icône pour A PROPOS
+        },
+
     ];
 
     const [isOpen, setOpen] = useState(false);
+
+    // 🔄 Vérifie la session au montage et à chaque changement de loginStateChange
+    const checkSession = async () => {
+        const valid = await isSessionStillValid();
+        setIsLoggedIn(valid);
+        // if (!valid) {
+        //     logout();
+        // }
+    };
+
+    const checkUserInfo = async () => {
+        const user = await getUserName();
+        if (user) {
+            setUserName(user);
+        }
+    };
+
+    const checkUserRole = async () => {
+        const role = await getUserRole();
+        if (role) {
+            setUserRole(role);
+        }
+
+    };
+
+    useEffect(() => { checkSession(); checkUserInfo(); checkUserRole(); }, []);
 
     return (
         <>
@@ -77,15 +118,18 @@ const HeaderMarket: React.FC = ({ }) => {
                 <div className="py-4 md:py-2 items-center w-full bg-white">
 
                     <div className="max-w-7xl mx-4 px-4 lg:mx-auto flex justify-between items-center gap-x-10">
-
-                        <div className="flex justify-start ml-0 items-center gap-4 ">
+                        <div className="flex justify-start items-center gap-1 -ml-16"> {/* marge négative */}
                             <Link href="/" className="flex items-center">
-                                <Image src="/peoogo.png" alt="logo" className="h-20 md:h-20 px-6" width={110} height={100} layout="intrinsic" />
+                                <Image src="/peoogo/Peoogo-svg/Peoogo-15.svg" alt="logo"
+                                    width={180}
+                                    height={180} className="object-contain max-h-16 md:max-h-20 px-2"
+                                    priority/>
                             </Link>
                         </div>
 
+
                         {/* Navigation pour les écrans plus grands */}
-                        <nav className="hidden md:flex gap-3">
+                        <nav className="hidden md:flex gap-2">
                             <NavigationMenu className="flex justify-start items-start">
                                 <NavigationMenuList className="flex justify-start gap-4 flex-row">
                                     {navigationItems.map((item) => (
@@ -94,7 +138,7 @@ const HeaderMarket: React.FC = ({ }) => {
                                             {item.href ? (
                                                 <>
                                                     <NavigationMenuLink href={item.href}>
-                                                        <button className="font-bold text-green-900 uppercase leading-tight px-2 py-1 text-sm hover:bg-gray-100 flex items-center gap-1">
+                                                        <button className="font-bold text-black  leading-tight px-2 py-1 text-sm hover:bg-gray-100 flex items-center gap-1">
                                                             {item.icon}
                                                             {item.title}
                                                         </button>
@@ -102,7 +146,7 @@ const HeaderMarket: React.FC = ({ }) => {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <NavigationMenuTrigger className="font-bold text-green-900 uppercase leading-tight text-sm font-title tracking-tight text-lg px-2 py-1 gap-1">
+                                                    <NavigationMenuTrigger className="font-bold text-[#B07B5E]  uppercase leading-tight text-sm font-title tracking-tight text-lg px-2 py-1 gap-1">
                                                         {item.title}
                                                     </NavigationMenuTrigger>
                                                 </>
@@ -115,31 +159,40 @@ const HeaderMarket: React.FC = ({ }) => {
 
                         <div className="flex items-center gap-4">
 
-                            <div onClick={() => setShowSideCart(true)} className="flex items-center gap-2 relative">
-                                <Bell className="w-6 h-6 text-gray-600" />
-                                {notifications.length > 0 && (
-                                    <span className="absolute -top-2 -right-2 text-xs text-white bg-red-600 w-5 h-5 rounded-full flex items-center justify-center">
-                                        {notifications.length >= 9 ? "9+" : notifications.length}
-                                    </span>
-                                )}
-                            </div>
+                            {isLoggedIn && (
+                                <div onClick={() => setShowSideCart(true)} className="flex items-center gap-2 relative">
+                                    <Bell className="w-6 h-6 text-[#B07B5E]" />
+                                    {notifications.length > 0 && (
+                                        <span className="absolute -top-2 -right-2 text-xs text-white bg-red-600 w-5 h-5 rounded-full flex items-center justify-center">
+                                            {notifications.length >= 9 ? "9+" : notifications.length}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
 
                             <div onClick={() => setShowSideCart(true)} className="flex items-center gap-2 relative">
-                                <ShoppingBasket className="w-6 h-6 text-gray-600" />
+                                <ShoppingBasket className="w-6 h-6 text-[#B07B5E] " />
                                 {cartItems > 0 && (
-                                    <span className="absolute -top-2 -right-2 text-xs text-white bg-green-900 w-5 h-5 rounded-full flex items-center justify-center">
+                                    <span className="absolute -top-2 -right-2 text-xs text-white bg-[#B07B5E]  w-5 h-5 rounded-full flex items-center justify-center">
                                         {cartItems >= 9 ? "9+" : cartItems}
                                     </span>
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-2">
-                                <User className="w-6 h-6 text-gray-600" />
-                                <div className="hidden md:block text-sm">
-                                    <div className="font-medium">TRA BI</div>
-                                    <div className="text-gray-500">DAVID</div>
+                            {isLoggedIn ? (
+                                <div className="flex items-center gap-2">
+                                    <User className="w-6 h-6 text-[#B07B5E]" />
+                                    <div className="hidden md:block text-sm">
+                                        <div className="font-medium text-[#B07B5E]">TRA BI</div>
+                                        <div className="text-[#B07B5E]">DAVID</div>
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <User onClick={() => router.push('/auth/login')} className="w-6 h-6 text-[#B07B5E]" />
+                                </div>
+                            )}
+
                         </div>
 
 
@@ -155,7 +208,7 @@ const HeaderMarket: React.FC = ({ }) => {
                                         {navigationItems.map((item) => (
                                             <div key={item.title} className="flex flex-col gap-2">
                                                 {item.href ? (
-                                                    <Link href={item.href} className="flex justify-between items-center font-bold text-green-900 uppercase leading-tight"
+                                                    <Link href={item.href} className="flex justify-between items-center font-bold text-[#B07B5E]  uppercase leading-tight"
                                                         onClick={() => setOpen(false)} >
                                                         <span className="text-sm font-extrabold font-title tracking-tighter flex items-center">
                                                             {item.icon}
@@ -164,7 +217,7 @@ const HeaderMarket: React.FC = ({ }) => {
                                                         <MoveRight className="w-4 h-4 stroke-1 text-muted-foreground" />
                                                     </Link>
                                                 ) : (
-                                                    <p onClick={() => setOpen(false)} className="font-bold text-green-900 uppercase leading-tight text-sm font-extrabold font-title tracking-tighter flex items-center" >
+                                                    <p onClick={() => setOpen(false)} className="font-bold text-[#B07B5E]  uppercase leading-tight text-sm font-extrabold font-title tracking-tighter flex items-center" >
                                                         {item.title}
                                                     </p>
                                                 )}

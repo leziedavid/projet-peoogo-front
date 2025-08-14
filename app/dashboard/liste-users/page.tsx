@@ -9,12 +9,14 @@ import { getAllUser } from "@/api/services/authService";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { DataTableSkeleton } from "@/components/table/data-table-skeleton";
-import { UserForm } from "@/components/form/userForm";
 import FilesPreviewDialog from "@/components/form/filesPreviewDialog";
 import FilterUser from "@/components/filter/FilterUser";
 import { filterEnrollementsmodeCarte, filterEnrollementsmodeGraphique, filterEnrollementsTableau, getAllPaginate } from '@/api/services/enrollementsServices';
 import { EnrollementData } from "@/types/ApiReponse/enrollementControleResponse";
 import { EnrollementStatByDate, GeoCoord } from "@/types/ApiReponse/StatistiquesEnrollementResponse";
+import { toast } from "sonner";
+import AddUsersForms from "@/components/form/AddUsersForms";
+import { Role, TypeCompte, UserFormValues, UserStatus } from "@/types/ApiRequest/User";
 
 
 export default function Page() {
@@ -27,9 +29,7 @@ export default function Page() {
     const [totalItems, setTotalItems] = useState(0);
     const [limit] = useState(10);
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [isAssignFormOpen, setIsAssignFormOpen] = useState(false);
-    const [initialValues, setInitialValues] = useState<User>();
-    const [isAddDriverFormOpen, setIsAddDriverFormOpen] = useState(false);
+    const [initialValues, setInitialValues] = useState<UserFormValues>();
     const [loading, setLoading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState("");
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -115,9 +115,9 @@ export default function Page() {
         }
     };
 
-    const fetchData = async (page: number) => {
+    const fetchData = async () => {
         try {
-            const res = await getAllUser(page, limit);
+            const res = await getAllUser(currentPage, limit);
             if (res.data) {
                 setUser(res.data.data);
                 setTotalItems(res.data.total);
@@ -129,7 +129,7 @@ export default function Page() {
     };
 
     useEffect(() => {
-        fetchData(currentPage);
+        fetchData();
     }, [currentPage]);
 
 
@@ -137,10 +137,28 @@ export default function Page() {
         alert(`Change state of ${row.id} to ${newStates.join(", ")}`);
     }
 
+    function formatUserForForm(row: User): UserFormValues {
+        return {
+            id: row.id,
+            name: row.name || '',
+            email: row.email || '',
+            password: '',
+            confirmPassword: '',
+            role: Object.values(Role).includes(row.role as Role) ? (row.role as Role) : undefined,
+            typeCompte: Object.values(TypeCompte).includes(row.typeCompte as TypeCompte) ? (row.typeCompte as TypeCompte) : undefined,
+            status: Object.values(UserStatus).includes(row.status as UserStatus) ? (row.status as UserStatus) : undefined,
+            phoneCountryCode: row.phoneCountryCode || '',
+            phoneNumber: row.phoneNumber || '',
+            file: undefined,
+        };
+    }
+
+    // Exemple d'utilisation
     function handleUpdate(row: User) {
         setIsFormOpen(true);
-        setInitialValues(row);
+        setInitialValues(formatUserForForm(row));
     }
+
 
     function handleDelete(row: User) {
         alert(`Delete ${row.id}`);
@@ -150,14 +168,22 @@ export default function Page() {
         alert(`Validate ${row.id} with value: ${val}`);
     }
 
-    // Exemple : si tu souhaites gérer la pagination manuellement (sinon, tu peux omettre ces fonctions)
     function handleNextPage() {
-        alert("Next page requested");
-    }
-    function handlePreviousPage() {
-        alert("Previous page requested");
+        if (currentPage < Math.ceil(totalItems / limit)) {
+            setCurrentPage(currentPage + 1);
+        } else {
+            toast.error("Vous êtes déjà sur la dernière page.");
+        }
     }
 
+    function handlePreviousPage() {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        } else {
+            toast.error("Vous êtes déjà sur la première page.");
+        }
+    }
+    
     function openUserForm() {
         setIsFormOpen(true);
     }
@@ -165,7 +191,7 @@ export default function Page() {
     function closeForm() {
         setIsFormOpen(false);
         setInitialValues(undefined);
-        fetchData(currentPage);
+        fetchData();
     }
 
 
@@ -176,10 +202,10 @@ export default function Page() {
         <div className="w-full overflow-x-auto">
 
 
-            <FilterUser  onFilter={searchData} />
-
+            <FilterUser onFilter={searchData} />
+ 
             <div className="flex justify-end mb-4 space-x-2">
-                <Button onClick={openUserForm} className="bg-gray-600 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md flex items-center gap-2" >
+                <Button onClick={openUserForm} className="bg-gray-600 hover:bg-[#B07B5E] text-white font-semibold py-2 px-4 rounded-md flex items-center gap-2" >
                     <UserPlus className="w-4 h-4" />
                     Ajouter un compte
                 </Button>
@@ -198,17 +224,21 @@ export default function Page() {
                         data={user}
                         onChangeState={handleChangeState}
                         onUpdateData={handleUpdate}
-                        onDeleteData={handleDelete}
-                        onNextPage={handleNextPage}          // optionnel : gère la page suivante
-                        onPreviousPage={handlePreviousPage}  // optionnel : gère la page précédente
+                        onNextPage={handleNextPage}
+                        onPreviousPage={handlePreviousPage}
+                        currentPage={currentPage}
+                        totalItems={totalItems}
+                        itemsPerPage={limit}
                     />
+
+
                     <FilesPreviewDialog imageUrl={previewUrl} open={dialogOpen} onOpenChange={setDialogOpen} />
                 </>
 
             )}
 
             {isFormOpen && (
-                <UserForm initialValues={initialValues} onClose={closeForm} isOpen={isFormOpen} />
+                <AddUsersForms initialValue={initialValues} onClose={closeForm} isOpen={isFormOpen} fetchData={fetchData} />
             )}
 
         </div>

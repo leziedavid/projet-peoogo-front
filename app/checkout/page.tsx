@@ -18,6 +18,7 @@ import { z } from "zod";
 import { DeliveryMethod, PaymentMethod } from "@/types/AllTypes";
 import { toast } from "sonner";
 import HeaderMarket from "@/components/market/HeaderMarket";
+import { Footer } from '@/components/home/Footer';
 
 
 type OrderCheckoutInput = z.infer<typeof orderCheckoutSchema>;
@@ -388,6 +389,7 @@ export default function Page() {
                     </form>
                 </div>
             </div>
+            <Footer />
         </>
     );
 }

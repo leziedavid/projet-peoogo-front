@@ -2,10 +2,7 @@ import { LoginDto, RefreshTokenResponse, RegisterDto, UserAuth } from '@/types/A
 import { BaseResponse } from '@/types/BaseResponse'
 import { getBaseUrl } from '@/types/baseUrl'
 import { Pagination } from '@/types/pagination'
-import { getUserInfos } from '@/app/middleware'
-import { Service } from '@/types/ApiReponse/ServicesResponse'
-import { DriverInfo, VehicleWithDrivers } from '@/types/ApiReponse/Vehicle-with-drivers'
-import { ServiceSubscription } from '@/types/ApiReponse/ServiceSubscriptionResponse'
+
 import { User } from '@/types/ApiReponse/UsersResponse'
 import { Category, OrderStatus, Variant } from '@/types/AllTypes'
 import { Product } from '@/types/ApiReponse/ProduitsResponse'

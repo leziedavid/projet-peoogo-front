@@ -1,5 +1,4 @@
 
-import { getUserInfos } from '@/app/middleware'
 import { EnrollementData } from '@/types/ApiReponse/enrollementControleResponse'
 import { ActiviteResponse, DepartmentResponse, DistrictResponse, LocaliteResponse, RegionResponse, SousPrefectureResponse, StatusDossier } from '@/types/ApiReponse/ListeResponse'
 import { EnrollementStatByDate, GeoCoord } from '@/types/ApiReponse/StatistiquesEnrollementResponse'
@@ -12,8 +11,6 @@ import { tr } from 'date-fns/locale'
 
 export const getAllActivite = async (): Promise<BaseResponse<ActiviteResponse[]>> => {
     try {
-        const user = await getUserInfos()
-
         const response = await fetch(`${getBaseUrl()}/activites`, {
             method: 'GET',
             headers: {
@@ -31,7 +28,6 @@ export const getAllActivite = async (): Promise<BaseResponse<ActiviteResponse[]>
 
 export const getAllSpeculations = async (): Promise<BaseResponse<ActiviteResponse[]>> => {
     try {
-        const user = await getUserInfos()
 
         const response = await fetch(`${getBaseUrl()}/speculations`, {
             method: 'GET',
@@ -242,7 +238,7 @@ export const getAllEnrollementsByPage = async (page: number, limit: number): Pro
 export const getAllPaginate = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<EnrollementData>>> => {
 
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/paginate/liste/all?page=${page}&limit=${limit}`, {
+        const response = await fetch(`${getBaseUrl()}/enrollements/paginates/listes/one/paginate-all?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -436,6 +432,71 @@ export const filterEnrollementsmodeGraphique = async (filters: FilterRequest, pa
                 Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify(filters),
+        });
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Erreur lors du filtrage des enrôlements :', error);
+        throw error;
+    }
+};
+
+
+// getStatistiquesControle
+
+export const getStatistiquesControle = async (numero_lot?: string): Promise<BaseResponse<any>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/enrollements/stats/controle${numero_lot ? `?numero_lot=${numero_lot}` : ''}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+            },
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Erreur lors de la récupération des statistiques des enrôlements :', error);
+        throw error;
+    }
+};
+
+// getStatsAdmin
+
+export const getStatsAdmin = async (filters: FilterRequest): Promise<BaseResponse<any>> => {
+
+    try {
+        const response = await fetch(`${getBaseUrl()}/enrollements/stats/admin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+            },
+            body: JSON.stringify(filters),
+        });
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Erreur lors de la récupération des statistiques des enrôlements :', error);
+        throw error;
+    }
+
+
+
+
+};
+
+
+
+export const getPaginatedByAgent = async (page: number, limit: number): Promise<BaseResponse<Pagination<EnrollementData>>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/enrollements/liest/enrollement/paginate/by-agent?page=${page}&limit=${limit}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+            },
         });
 
         return await response.json();

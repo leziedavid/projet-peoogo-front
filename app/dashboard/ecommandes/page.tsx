@@ -13,11 +13,11 @@ import { columns as columnsEcommercecolumns } from "@/types/columns/columnsEcomm
 import { StatistiquesCommandesResponse } from "@/types/ApiReponse/StatistiquesCommandesResponse";
 import LineChart from "@/components/chart/LineChart";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EcommerceOrder} from "@/types/ApiReponse/EcommerceOrderResponse";
 import { StatistiquesEcommerceOrderResponse } from "@/types/ApiReponse/StatistiquesEcommerceOrderResponse";
 import { toast } from "sonner";
-import { OrdersEcommerceDetail } from "@/components/form/ordersEcommerce";
+import OrderDetails from "@/components/market/OrderDetails";
+import Reversement from "@/components/form/Reversement";
 
 export default function Page() {
 
@@ -35,9 +35,9 @@ export default function Page() {
     const [userProductStats, setUserProductStats] = useState<StatistiquesEcommerceOrderResponse | null>(null);
     const [globalProductStats, setGlobalProductStats] = useState<StatistiquesEcommerceOrderResponse | null>(null);
     const [ordersAndRevenueStats, setOrdersAndRevenueStats] = useState<StatistiquesCommandesResponse | null>(null);
-    // startDate
     const [startDate, setStartDate] = useState<string | null>(null);
-    // endDate
+    const [isOpen, setIsOpen] = useState(false)
+    const [isReversementOpen, setIsReversementOpen] = useState(false)
     const [endDate, setEndDate] = useState<string | null>(null);
 
     const router = useRouter();
@@ -170,8 +170,12 @@ export default function Page() {
 
     function handleUpdate(row: EcommerceOrder) {
         setFormInitialValues(row);
-        setIsFormOpen(true);
-        
+        setIsOpen(true);
+    }
+
+    function handleAddReversement(row: EcommerceOrder) {
+        setFormInitialValues(row);
+        setIsReversementOpen(true);
     }
 
     function handleDelete(row: EcommerceOrder) {
@@ -294,18 +298,12 @@ export default function Page() {
                     currentPage={currentPage}
                     totalItems={totalItems}
                     itemsPerPage={limit}
+                    onAddReversement={handleAddReversement}
                 />
 
             )}
-
-            {isFormOpen && (
-                <OrdersEcommerceDetail
-                    data={data}
-                    onClose={closeForm}
-                    isOpen={isFormOpen}
-                />
-            )}
-
+            <OrderDetails isOpen={isOpen} onClose={() => setIsOpen(false)} order={data} />
+            <Reversement isOpen={isReversementOpen} onClose={() => setIsReversementOpen(false)} initialValue={data} fetchData={getAllProduct} />
         </div>
     );
 }

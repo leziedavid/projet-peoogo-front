@@ -33,18 +33,41 @@ export interface EcommerceOrderItem {
 
 export interface Product {
     id: string;
-    name: string;
+    nom: string;
+    code: string;
     description: string;
-    price: number;
-    stock: number;
-    sku: string;
+    quantite: number;
+    unite: string;
     imageUrl: string | null;
-    createdAt: string;
-    updatedAt: string;
-    categoryId: string;
-    serviceId: string;
+    prixUnitaire: number;
+    prixEnGros: number;
+    paymentMethod: string;
+    saleType: string;
+    status: string;
+    typeActeur: string;
+    disponibleDe: string; // ISO date
+    disponibleJusqua: string; // ISO date
+    image: string | null;
+    autreImage: string | null;
+    codeUsers: string;
     addedById: string;
+    createdAt: string; // ISO date
+    updatedAt: string; // ISO date
+    decoupageId: string;
+    producer?: EnrichedProducer; // <-- ajouté ici
 }
+
+
+
+export interface EnrichedProducer {
+    id: string;
+    name: string;
+    phoneNumber?: string | null;
+    typeCompte?: string | null;
+    totalQuantity: number;
+    totalAmount: number;
+}
+
 
 export interface User {
     id: string;

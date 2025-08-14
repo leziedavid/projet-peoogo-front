@@ -2,12 +2,40 @@
 // Generated from Prisma schema
 
 // Enums
+
+
+export enum StatusDossier {
+    NON_TRAITE,
+    VAL,
+    REJ,
+    DOUBLON,
+    ENCOURS,
+    DEL,
+    IMAGE_INCOR,
+    DOUBLON_NUMBER,
+}
+
+
+export enum TypeCompte {
+    AGRICULTEURS,
+    AQUACULTEURS,
+    AUTRE_ACTEURS,
+    APICULTEURS,
+    REVENDEUR,
+    TRANSFORMATEUR,
+    ACHETEUR,
+    RELAIS,
+    SUPPERVISEUR,
+    UTILISATEUR,
+}
+
 export enum Role {
     ADMIN = "ADMIN",
     USER = "USER",
-    DRIVER = "DRIVER",
-    PARTNER = "PARTNER",
-    LIVREUR = "LIVREUR",
+    AGENT_ENROLEUR = "AGENT_ENROLEUR",
+    AGENT_CONTROLE = "AGENT_CONTROLE",
+    PRODUCTEUR = "PRODUCTEUR",
+
 }
 
 export enum TripStatus {
@@ -40,6 +68,7 @@ export enum PaymentMethod {
     CARD = "CARD",
     BANK_TRANSFER = "BANK_TRANSFER",
 }
+
 export enum PaymentMethodFrench {
     IMMEDIATE = "PAIEMENT IMMÉDIAT",
     ON_ARRIVAL = "PAIEMENT À LA LIVRAISON",
@@ -64,7 +93,6 @@ export enum DeliveryMethodFrench {
     DROP = "DÉPÔT À UN POINT",
 }
 
-
 export enum TransactionType {
     DEPOSIT = "DEPOSIT",
     PAYMENT = "PAYMENT",
@@ -78,7 +106,6 @@ export enum TransactionTypeFrench {
     COMMISSION = "COMMISSION",
     REFUND = "REMBOURSEMENT",
 }
-
 
 export enum VehicleType {
     ECONOMIQUE = "ECONOMIQUE",
@@ -253,29 +280,28 @@ export interface ServiceSubscription {
 }
 
 export interface Products {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  mainImageUrl: string;
-  price: number;
-  unite: number;
-  pricePromo: number;
-  tvaId: string;
-  etatStocks: string;
-  stocks: string;
-  venteIndividuelle: boolean;
-  nbAchatPossible: number;
-  poids: number;
-  longueur: number;
-  largeur: number;
-  hauteur: number;
-  modePay: string;
-  moyenPay: string;
-  categories: string[];
-  subcategories: string[];
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    mainImageUrl: string;
+    price: number;
+    unite: number;
+    pricePromo: number;
+    tvaId: string;
+    etatStocks: string;
+    stocks: string;
+    venteIndividuelle: boolean;
+    nbAchatPossible: number;
+    poids: number;
+    longueur: number;
+    largeur: number;
+    hauteur: number;
+    modePay: string;
+    moyenPay: string;
+    categories: string[];
+    subcategories: string[];
 }
-
 
 export interface Product {
     id: string;

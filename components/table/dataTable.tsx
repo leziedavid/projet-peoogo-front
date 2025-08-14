@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Edit, MoreHorizontal, Trash } from "lucide-react";
+import { ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronRight, Edit, MoreHorizontal, Trash } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -62,11 +62,13 @@ interface DataTableProps<T> {
     currentPage?: number
     totalItems?: number
     itemsPerPage?: number
+    onAddReversement?: (row: T) => void;
+
 }
 
 export function DataTable<T extends { id: string }>({
 
-    columns,data,onChangeState,onUpdateData,onDeleteData,onValidateData,
+    columns,data,onChangeState,onUpdateData,onDeleteData,onValidateData,onAddReversement,
     stateOptions = [],onNextPage,onPreviousPage, currentPage = 1, totalItems = 0, itemsPerPage = 10,
 
     }: DataTableProps<T>) {
@@ -106,20 +108,12 @@ export function DataTable<T extends { id: string }>({
             {/* Barre de filtre responsive */}
             <div className="flex flex-wrap items-center py-4 space-x-4 max-w-full overflow-x-auto">
 
-                {columns.length > 1 && columns[1]?.id && (
-                    <Input
-                        placeholder={`Filtrer ${columns[1]?.header ?? "colonne"}...`}
-                        value={
-                            (table.getColumn(columns[1]?.id ?? "")?.getFilterValue() as
-                                | string
-                                | undefined) ?? ""
-                        }
-                        onChange={(e) =>
-                            table.getColumn(columns[1]?.id ?? "")?.setFilterValue(e.target.value)
-                        }
-                        className="w-full sm:max-w-sm"
-                    />
-                )}
+                {/* {columns.length > 1 && columns[1]?.id && (
+                    <Input placeholder={`Filtrer ${columns[1]?.header ?? "colonne"}...`}
+                        value={ (table.getColumn(columns[1]?.id ?? "")?.getFilterValue() as | string | undefined) ?? "" }
+                        onChange={(e) => table.getColumn(columns[1]?.id ?? "")?.setFilterValue(e.target.value) }
+                        className="w-full sm:max-w-sm"/>
+                )} */}
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -222,32 +216,32 @@ export function DataTable<T extends { id: string }>({
                                                             </>
                                                         )}
 
+                                                        {/* onAddReversement */}
+
+                                                        {onAddReversement && (
+                                                            <DropdownMenuItem onSelect={() => onAddReversement(row.original)} className="text-xs" >
+                                                                <ArrowUpDown className="mr-2 h-3 w-3" />
+                                                                Reversement
+                                                            </DropdownMenuItem>
+                                                        )}
+
                                                         {/* Actions */}
                                                         {onUpdateData && (
-                                                            <DropdownMenuItem
-                                                                onSelect={() => onUpdateData(row.original)}
-                                                                className="text-xs"
-                                                            >
+                                                            <DropdownMenuItem onSelect={() => onUpdateData(row.original)} className="text-xs" >
                                                                 <Edit className="mr-2 h-3 w-3" />
                                                                 Modifier
                                                             </DropdownMenuItem>
                                                         )}
 
                                                         {onDeleteData && (
-                                                            <DropdownMenuItem
-                                                                onSelect={() => onDeleteData(row.original)}
-                                                                className="text-xs text-red-600 focus:text-red-600"
-                                                            >
+                                                            <DropdownMenuItem onSelect={() => onDeleteData(row.original)} className="text-xs text-red-600 focus:text-red-600" >
                                                                 <Trash className="mr-2 h-3 w-3" />
                                                                 Supprimer
                                                             </DropdownMenuItem>
                                                         )}
 
                                                         {onValidateData && (
-                                                            <DropdownMenuItem
-                                                                onSelect={() => onValidateData(row.original, "validated")}
-                                                                className="text-xs text-green-600 focus:text-green-600"
-                                                            >
+                                                            <DropdownMenuItem onSelect={() => onValidateData(row.original, "validated")} className="text-xs text-green-600 focus:text-green-600" >
                                                                 <Check className="mr-2 h-3 w-3" />
                                                                 Valider
                                                             </DropdownMenuItem>

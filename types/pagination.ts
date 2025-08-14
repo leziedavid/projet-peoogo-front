@@ -4,4 +4,5 @@ export interface Pagination<T> {
     page: number
     limit: number
     data: T[]
+    numero_lot: string | null
 }

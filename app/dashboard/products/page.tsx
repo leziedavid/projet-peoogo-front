@@ -15,6 +15,9 @@ import { DataTable } from '@/components/table/dataTable';
 import { columns as ProductColumns } from "@/types/columns/product-columns";
 import DashboardProduct from '@/components/dash/DashboardProduct';
 import { StatistiquesDesProduitsResponse } from '@/types/ApiReponse/StatistiquesDesProduitsResponse';
+import DeleteDialog from '@/components/Dialog/DeleteDialog';
+import { deleteProduct } from '@/api/services/authService';
+import { ProductsRequest } from '@/types/ApiRequest/ProductsRequest';
 
 
 export default function Page() {
@@ -24,7 +27,7 @@ export default function Page() {
     const [code, setCode] = useState('');
     const [isVerified, setIsVerified] = useState(false);
     const [userEnrollementData, setUserEnrollementData] = useState<UserEnrollementData | null>(null);
-    const [initialValues, setInitialValues] = useState<ProductRequest | null>(null);
+    const [initialValues, setInitialValues] = useState<ProductsRequest | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
@@ -54,6 +57,11 @@ export default function Page() {
             // console.error("Erreur lors de la récupération des données d'enrôlement :", res.message);
         }
     };
+
+    // code,
+    useEffect(() => {
+        fechproductsByCode();
+    }, [currentPage]);
 
     const fechstatBycodeusers = async () => {
         const res = await getProducteurProductStats(code.trim());
@@ -95,6 +103,7 @@ export default function Page() {
 
     const ChangeTabs = (tab: 'liste' | 'ajout') => {
         setActiveTab(tab);
+        setInitialValues(null);
         fechproductsByCode();
         fechstatBycodeusers();
     };
@@ -105,9 +114,10 @@ export default function Page() {
     }
 
     function handleUpdate(row: any) {
-        setEditData(row)
-        setIsFormOpen(true);
+        setInitialValues(row)
+        setActiveTab('ajout');
     }
+
 
     function handleDelete(row: any) {
         setSelectedId(row.id);
@@ -115,6 +125,18 @@ export default function Page() {
     }
 
     const handleDeleteClick = async (id: string): Promise<void> => {
+
+        const result = await deleteProduct(id);
+        if (result.statusCode !== 200) {
+            toast.error(result.message);
+            fechproductsByCode();
+            fechstatBycodeusers();
+        } else {
+            toast.success("Produit supprimé avec succès !");
+            setDeleteDialogOpen(false);
+            fechproductsByCode();
+            fechstatBycodeusers();
+        }
     };
 
     function handleNextPage() {
@@ -135,11 +157,10 @@ export default function Page() {
 
     return (
         <>
-
             <div className="w-full overflow-x-auto">
 
                 <div className="flex items-center justify-between bg-gray-100 p-3 rounded-md">
-                    Mon espaces de production ENROLEMENT229545270544
+                    Mon espaces de production {userEnrollementData?.user.generatedCode}
                 </div>
 
                 {isVerified && (
@@ -156,18 +177,14 @@ export default function Page() {
                         <>
                             <Card className="w-full max-w-md shadow-lg mt-6">
                                 <CardHeader>
-                                    <CardTitle className="text-center">Identification Producteur</CardTitle>
+                                        <CardTitle className="text-center text-[#B07B5E] uppercase">Identification Producteur</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex flex-col gap-4">
                                     <div>
                                         <label className="font-medium text-sm">CODE PRODUCTEUR</label>
-                                        <Input
-                                            placeholder="Entrer le code"
-                                            value={code}
-                                            onChange={(e) => setCode(e.target.value)}
-                                        />
+                                        <Input  placeholder="Entrer le code" value={code} onChange={(e) => setCode(e.target.value)} />
                                     </div>
-                                    <Button onClick={handleVerifyCode} className="w-full">
+                                    <Button onClick={handleVerifyCode} className="w-full bg-[#B07B5E] hover:bg-[#045d28] text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200" >
                                         Vérifier
                                     </Button>
                                 </CardContent>
@@ -201,7 +218,12 @@ export default function Page() {
 
                                 {activeTab === 'ajout' && (
                                     <div className="mt-6">
-                                        <ProductForm initialValues={initialValues ?? undefined} userEnrollementData={userEnrollementData ?? null}
+                                        <ProductForm
+                                        initialValues={initialValues ?? undefined}
+                                        userEnrollementData={userEnrollementData ?? null }
+                                        fechproductsByCode={fechproductsByCode}
+                                        setActiveTab={setActiveTab}
+                                        codeUsers={code.trim()}
                                         />
                                     </div>
                                 )}
@@ -211,6 +233,8 @@ export default function Page() {
 
                     )}
                 </div>
+                
+                <DeleteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onConfirm={() => {  if (selectedId) handleDeleteClick(selectedId);}}/>
 
             </div>
         </>

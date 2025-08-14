@@ -224,7 +224,7 @@ export default function EnrollementForm({ initialValues }: Props) {
     };
 
     // Chargement initial des données statiques
-
+    
     useEffect(() => {
         getAllActivites();
         getAllSpeculation();
@@ -287,23 +287,21 @@ export default function EnrollementForm({ initialValues }: Props) {
             const hasDecoupageData = Object.values(decoupageToSend).some(v => !!v);
             if (hasDecoupageData) {
                 formData.append('decoupage', JSON.stringify(decoupageToSend));
-                console.log('Decoupage ajouté:', decoupageToSend);
+                // console.log('Decoupage ajouté:', decoupageToSend);
             }
+            // Champs à exclure de la boucle
+            const excludedKeys = ['decoupage', 'photo', 'photo_document_1', 'photo_document_2'];
 
             // Pour les autres champs
             for (const [key, value] of Object.entries(data)) {
-                if (key === 'decoupage') {
-                    // On a déjà géré decoupage, on skip ici
-                    continue;
-                } else if (
-                    key === 'photo' ||
-                    key === 'photo_document_1' ||
-                    key === 'photo_document_2'
-                ) {
-                    if (value instanceof File) {
-                        formData.append(key, value);
-                    }
-                } else if (key === 'typeCompte') {
+                
+                // if (key === 'decoupage') {
+                //     // On a déjà géré decoupage, on skip ici
+                //     continue;
+                // }
+                if (excludedKeys.includes(key)) continue;
+
+                if (key === 'typeCompte') {
                     formData.append('typeCompte', value);
                 } else if (
                     typeof value === 'boolean' ||
@@ -318,6 +316,24 @@ export default function EnrollementForm({ initialValues }: Props) {
                 }
             }
 
+            if (data.photo) {
+                formData.append('photo', data.photo); // Pas de [0]
+            }
+            if (data.photo_document_1) {
+                formData.append('photo_document_1', data.photo_document_1);
+            }
+            if (data.photo_document_2) {
+                formData.append('photo_document_2', data.photo_document_2);
+            }
+
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}: File name: ${value.name}, type: ${value.type}, size: ${value.size}`);
+                } else {
+                    console.log(`${key}: ${value}`);
+                }
+            }
+
             // Ensuite, tu appelles ton API create ou update avec formData
             const isEdit = Boolean(initialValues?.id);
             if (isEdit) {
@@ -328,7 +344,7 @@ export default function EnrollementForm({ initialValues }: Props) {
 
                 } else {
                     toast.error(res.message);
-                    console.error('Erreur lors de la mise à jour du formulaire d\'enrôlement :', res.message);
+                    // console.error('Erreur lors de la mise à jour du formulaire d\'enrôlement :', res.message);
                 }
 
             } else {
@@ -345,8 +361,9 @@ export default function EnrollementForm({ initialValues }: Props) {
             }
 
         } catch (error) {
-            console.error(error);
-            alert(`Erreur lors de l'enregistrement : ${error instanceof Error ? error.message : error}`);
+            const msg = error instanceof Error ? error.message: typeof error === 'string' ? error : JSON.stringify(error); // fallback si c'est un objet ou autre
+            toast.error(msg);
+            // alert(`Erreur lors de l'enregistrement : ${error instanceof Error ? error.message : error}`);
         }
     };
 

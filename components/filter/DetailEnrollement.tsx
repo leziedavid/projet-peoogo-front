@@ -8,11 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, UserCheck,X } from 'lucide-react';
+import { User, UserCheck, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { renderStatutBadge } from '../renderStatutBadge';
 import { formatEstimatedArrival } from '@/lib/formatEstimatedArrival';
+import Image from 'next/image';
+import {getUserName, getUserRole, isSessionStillValid } from '@/app/middleware';
 
 
 type EnrollementProps = {
@@ -21,18 +23,31 @@ type EnrollementProps = {
     onClose: () => void;
 };
 
+const DEFAULT_IMAGE_URL = '/photos_09.svg';
+const DEFAULT_IMAGE_VERSO = '/documents.png';
+const DEFAULT_IMAGE_RECTO = '/documents.png';
+
 
 export default function DetailEnrollement({ initialValue, isOpen, onClose }: EnrollementProps) {
 
 
-const formatDate = (dateString?: string | null) => dateString ? format(new Date(dateString), "dd MMMM yyyy 'à' HH:mm", { locale: fr }) : ''
-const safeValue = (val: any) => val ?? '';
+    const formatDate = (dateString?: string | null) => dateString ? format(new Date(dateString), "dd MMMM yyyy 'à' HH:mm", { locale: fr }) : ''
+    const safeValue = (val: any) => val ?? '';
 
+    const photoUrl = initialValue?.photo || DEFAULT_IMAGE_URL;
+    const document1 = initialValue?.document1 || DEFAULT_IMAGE_VERSO;
+    const document2 = initialValue?.document2 || DEFAULT_IMAGE_RECTO;
+
+
+    const images: string[] = [
+        initialValue?.document1 || DEFAULT_IMAGE_VERSO,
+        initialValue?.document2 || DEFAULT_IMAGE_RECTO,
+    ];
 
     return (
         <div className={`fixed inset-0 bg-black/50 z-50 ${!isOpen && 'hidden'}`}>
             <div className={`fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform transform ${isOpen ? 'translate-x-0 w-full md:w-2/3' : 'translate-x-full'} bg-white shadow-xl`}>
-                
+
                 <div className="flex justify-between items-center mb-4">
                     <h5 className="text-lg font-semibold uppercase">Detail Enrollment</h5>
                     <Button variant="ghost" onClick={onClose}><X /></Button>
@@ -52,7 +67,7 @@ const safeValue = (val: any) => val ?? '';
                                 <div className="flex items-center gap-2">
                                     <User className="w-4 h-4 text-gray-500" />
                                     <Label className="text-sm font-medium text-gray-700">Agent contrôleur :</Label>
-                                    <p className="text-sm text-gray-900">{initialValue?.user_control?.name}</p> 
+                                    <p className="text-sm text-gray-900">{initialValue?.user_control?.name}</p>
                                 </div>
                             </div>
                         </div>
@@ -72,12 +87,20 @@ const safeValue = (val: any) => val ?? '';
                                                 <Label className="text-sm font-medium text-gray-700 mb-2 block">
                                                     9. Photo d'identité
                                                 </Label>
-                                                <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-50">
-                                                    <img
-                                                        src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI0MCIgdmlld0JveD0iMCAwIDIwMCAyNDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSIzMCIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNNjAgMTgwQzYwIDEzNy45IDc3LjkgMTIwIDEwMCAxMjBTMTQwIDEzNy45IDE0MCAxODBINjBaIiBmaWxsPSIjOUNBM0FGIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMjEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjc3NDhGIiBmb250LXNpemU9IjEyIj5QaG90byBkJ2lkZW50aXTDqTwvdGV4dD4KPC9zdmc+"
-                                                        alt="Photo d'identité"
-                                                        className="w-full h-full object-cover rounded"
-                                                    />
+                                                <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-64">
+                                                    <div className="w-full h-full bg-gradient-to-br from-red-100 to-green-100 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
+                                                    <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="w-full h-full object-cover rounded " />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Document d'identité */}
+                                            <div>
+                                                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                    12. Photo du document recto
+                                                </Label>
+                                                <div className="bg-gray-100 rounded-lg p-2 flex items-center justify-center h-64">
+                                                    <Image src={document1} alt="Photo du candidat" width={180} height={180} className="w-full h-full object-cover rounded " />
                                                 </div>
                                             </div>
 
@@ -87,39 +110,7 @@ const safeValue = (val: any) => val ?? '';
                                                     12. Photo du document recto
                                                 </Label>
                                                 <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-64">
-                                                    <div className="w-full h-full bg-gradient-to-br from-red-100 to-green-100 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
-                                                        <div className="text-center">
-                                                            <div className="w-16 h-12 bg-gray-300 rounded mx-auto mb-2"></div>
-                                                            <p className="text-xs text-gray-600 font-semibold">RÉPUBLIQUE DE CÔTE D'IVOIRE</p>
-                                                            <p className="text-xs text-gray-500 mt-1">Carte Nationale d'Identité</p>
-                                                            <div className="text-xs text-gray-700 mt-2 space-y-1">
-                                                                <p>BIEFFON SIAKA</p>
-                                                                <p>OUATTARA</p>
-                                                                <p>N° CI001266254</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Document d'identité */}
-                                            <div>
-                                                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                    12. Photo du document recto
-                                                </Label>
-                                                <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-64">
-                                                    <div className="w-full h-full bg-gradient-to-br from-red-100 to-green-100 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
-                                                        <div className="text-center">
-                                                            <div className="w-16 h-12 bg-gray-300 rounded mx-auto mb-2"></div>
-                                                            <p className="text-xs text-gray-600 font-semibold">RÉPUBLIQUE DE CÔTE D'IVOIRE</p>
-                                                            <p className="text-xs text-gray-500 mt-1">Carte Nationale d'Identité</p>
-                                                            <div className="text-xs text-gray-700 mt-2 space-y-1">
-                                                                <p>BIEFFON SIAKA</p>
-                                                                <p>OUATTARA</p>
-                                                                <p>N° CI001266254</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    <Image src={document2} alt="Photo du candidat" width={150} height={150} className="w-full h-full object-cover rounded " />
                                                 </div>
                                             </div>
 
@@ -233,8 +224,8 @@ const safeValue = (val: any) => val ?? '';
                                                     <div> <Label>21. District</Label> <Input value={initialValue?.decoupage.district.nom ?? ''} disabled className="mt-1 bg-gray-100 text-gray-600" /></div>
                                                     <div> <Label>22. Région</Label> <Input value={initialValue?.decoupage.region.nom ?? ''} disabled className="mt-1 bg-gray-100 text-gray-600" /></div>
                                                     <div> <Label>23. Département</Label> <Input value={initialValue?.decoupage.department.nom ?? ''} disabled className="mt-1 bg-gray-100 text-gray-600" /></div>
-                                                    <div><Label>24. Sous-préfecture</Label><Input value={initialValue?.decoupage.sousPrefecture.nom ?? ''} disabled className="mt-1 bg-gray-100 text-gray-600"/> </div>
-                                                    <div><Label>25. Localité</Label><Input value={initialValue?.decoupage.localite.nom ?? ''} disabled className="mt-1 bg-gray-100 text-gray-600"/> </div>
+                                                    <div><Label>24. Sous-préfecture</Label><Input value={initialValue?.decoupage.sousPrefecture.nom ?? ''} disabled className="mt-1 bg-gray-100 text-gray-600" /> </div>
+                                                    <div><Label>25. Localité</Label><Input value={initialValue?.decoupage.localite.nom ?? ''} disabled className="mt-1 bg-gray-100 text-gray-600" /> </div>
                                                 </div>
                                             </div>
                                         </div>
