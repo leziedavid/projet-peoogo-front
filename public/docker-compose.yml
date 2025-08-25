@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  db:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - mysql-net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - mysql-net
+
+networks:
+  mysql-net:
+    driver: bridge
+
+volumes:
+  db_data:
