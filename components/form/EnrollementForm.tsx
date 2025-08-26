@@ -6,10 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Camera, CreditCard, FileText, MapPin} from 'lucide-react';
+import { Camera, CreditCard, FileText, Loader2, MapPin } from 'lucide-react';
 import { EnrollementRequest, TypeCompte } from '@/types/ApiRequest/EnrollementRequest';
-import { ActiviteResponse,SpeculationsResponse } from '@/types/ApiReponse/ListeResponse';
-import { createEnrollement, getAllActivite,getAllSpeculations, updateEnrollement } from '@/api/services/enrollementsServices';
+import { ActiviteResponse, SpeculationsResponse } from '@/types/ApiReponse/ListeResponse';
+import { createEnrollement, getAllActivite, getAllEnrollements, getAllSpeculations, updateEnrollement } from '@/api/services/enrollementsServices';
 import { toast } from 'sonner';
 import { SelectWithSearch } from '../select/SelectWithSearch';
 import SelectDecoupage from '../filter/SelectDecoupage';
@@ -26,7 +26,7 @@ interface Props {
 }
 
 export default function EnrollementForm({ initialValues }: Props) {
-    const { register,control, handleSubmit, watch,formState: { errors }, setValue,} = useForm<EnrollementRequest>({
+    const { register, control, handleSubmit, watch, formState: { errors }, setValue, } = useForm<EnrollementRequest>({
         mode: "onChange", // valide à chaque changement
         defaultValues: {
             ...initialValues,
@@ -52,6 +52,8 @@ export default function EnrollementForm({ initialValues }: Props) {
         sousPrefectureId: '',
         localiteId: ''
     });
+    // --- état pour loader
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // État pour activer/désactiver le bouton submit
     const [canSubmit, setCanSubmit] = useState(false);
@@ -205,7 +207,7 @@ export default function EnrollementForm({ initialValues }: Props) {
     };
 
     // Chargement initial des données statiques
-    
+
     useEffect(() => {
         getAllActivites();
         getAllSpeculation();
@@ -237,6 +239,8 @@ export default function EnrollementForm({ initialValues }: Props) {
     // Submit
     const onSubmitHandler: SubmitHandler<EnrollementRequest> = async (data) => {
         try {
+
+            setIsSubmitting(true); // active loader
             const agent_id = localStorage.getItem('agent_id') || '';
             const agent_superviseur_id = localStorage.getItem('agent_superviseur_id') || '';
 
@@ -275,7 +279,7 @@ export default function EnrollementForm({ initialValues }: Props) {
 
             // Pour les autres champs
             for (const [key, value] of Object.entries(data)) {
-                
+
                 // if (key === 'decoupage') {
                 //     // On a déjà géré decoupage, on skip ici
                 //     continue;
@@ -334,6 +338,10 @@ export default function EnrollementForm({ initialValues }: Props) {
                 if (res.statusCode === 201) {
                     toast.success(res.message);
                     getAllEnrollements();
+                    // recharge après 5 secondes
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 5000);
 
                 } else {
                     toast.error(res.message);
@@ -342,7 +350,9 @@ export default function EnrollementForm({ initialValues }: Props) {
             }
 
         } catch (error) {
-            const msg = error instanceof Error ? error.message: typeof error === 'string' ? error : JSON.stringify(error); // fallback si c'est un objet ou autre
+
+            setIsSubmitting(false); // désactive loader
+            const msg = error instanceof Error ? error.message : typeof error === 'string' ? error : JSON.stringify(error); // fallback si c'est un objet ou autre
             toast.error(msg);
         }
     };
@@ -506,7 +516,7 @@ export default function EnrollementForm({ initialValues }: Props) {
                                         <SelectItem value="UNIVERSITAIRE">Universitaire</SelectItem>
                                         <SelectItem value="SAIS_LIRE_ET_ECRIRE">Sais lire et écrire</SelectItem>
                                         <SelectItem value="ALPHABETISE">Alphabétise</SelectItem>
-                                        
+
                                     </SelectContent>
                                 </Select>
                             )}
@@ -736,16 +746,22 @@ export default function EnrollementForm({ initialValues }: Props) {
                 </CardContent>
             </Card>
 
+
             <div className="text-center mt-6 w-full ">
+                <Button disabled={!canSubmit || isSubmitting} type="submit" className="w-full max-w-xs mx-auto flex items-center justify-center gap-2">
+                    {isSubmitting ? (
+                        <> <Loader2 className="animate-spin h-4 w-4" /> Enregistrement...  </> ) : ( "Enregistrer" )}
+                </Button>
+            </div>
+
+
+            {/* <div className="text-center mt-6 w-full ">
                 <Button disabled={!canSubmit} type="submit" className="w-full max-w-xs mx-auto">
                     Enregistrer
                 </Button>
-            </div>
+            </div> */}
 
         </form>
     );
 }
 
-function getAllEnrollements() {
-    throw new Error('Function not implemented.');
-}

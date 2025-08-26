@@ -71,7 +71,6 @@ export default function LoginPage() {
 
     // Gestion du changement de numéro de téléphone
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-
         setPhoneValue(e.target.value);
         setPhoneValid(true); // Vous pouvez ajouter une vraie validation ici
         if (!phoneTouched) setPhoneTouched(true);
@@ -134,7 +133,7 @@ export default function LoginPage() {
                         router.push('/dashboard/admin')
                         break
                     case Role.AGENT_ENROLEUR:
-                        router.push('/dashboard/enrollements')
+                        router.push('/enrollements')
                     case Role.AGENT_CONTROLE:
                         router.push('/dashboard/enrollements')
                     case Role.PRODUCTEUR:
@@ -144,7 +143,7 @@ export default function LoginPage() {
                         router.push('/mon-compte')
                         break
                     default:
-                        router.push('/dashboard/compte') // Tous les autres rôles vont ici
+                        router.push('/')
                         break
                 }
 

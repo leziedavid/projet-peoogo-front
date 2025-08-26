@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { loginByPhoneCode } from '@/api/services/auth';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Role } from '@/types/AllTypes';
+import { AllRole, Role } from '@/types/AllTypes';
 
 const loginSchema = z.object({
     login: z.string().min(1, "Le login est requis"),
@@ -22,7 +22,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-    const { register,  handleSubmit, formState: { errors, isSubmitting }, reset, } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema), });
+    const { register, handleSubmit, formState: { errors, isSubmitting }, reset, } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema), });
 
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
@@ -44,17 +44,27 @@ export default function LoginForm() {
                     router.push('/trajets');
                     return;
                 }
+            console.log(user.role);
 
                 switch (user.role) {
                     case Role.ADMIN:
-                        router.push('/dashboard/compte');
-                        break;
+                        router.push('/dashboard/compte')
+                        break
                     case Role.AGENT_ENROLEUR:
-                        router.push('/dashboard/enrollements');
-                        break;
+                        router.push('/enrollements')
+                        break
+                    case Role.AGENT_CONTROLE:
+                        router.push('/dashboard/enrollements')
+                        break
+                    case Role.PRODUCTEUR:
+                        router.push('/mon-compte')
+                        break
+                    case Role.USER:
+                        router.push('/mon-compte')
+                        break
                     default:
-                        router.push('/mon-compte');
-                        break;
+                        router.push('/')
+                        break
                 }
 
                 reset(); // Réinitialisation du formulaire
@@ -74,7 +84,7 @@ export default function LoginForm() {
     };
 
     return (
-        
+
         <div>
             <h1 className="text-3xl font-bold mb-2">SE CONNECTER</h1>
             <p className="text-gray-600 mb-8">
