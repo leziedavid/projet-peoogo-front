@@ -5,15 +5,15 @@ import { BaseResponse } from '@/types/BaseResponse'
 import { getBaseUrl } from '@/types/baseUrl'
 import { Pagination } from '@/types/pagination'
 import { tr } from 'date-fns/locale'
+import { secureFetch } from './auth'
 
 // Créer un reversement pour un producteur
 
 export const createReversement = async (data: any): Promise<BaseResponse<ReversementData>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/reversement`, {
+        const response = await secureFetch(`${getBaseUrl()}/reversement`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+            headers: { 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data), // 🔹 IMPORTANT : stringify l'objet
         });
@@ -28,11 +28,10 @@ export const createReversement = async (data: any): Promise<BaseResponse<Reverse
 // Récupérer tous les reversements avec pagination
 export const getAllReversements = async (page: number, limit: number): Promise<BaseResponse<Pagination<ReversementData>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/reversement?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/reversement?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -46,11 +45,10 @@ export const getAllReversements = async (page: number, limit: number): Promise<B
 // Récupérer un reversement par ID
 export const getReversementById = async (id: string): Promise<BaseResponse<ReversementData>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/reversement/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/reversement/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -64,11 +62,10 @@ export const getReversementById = async (id: string): Promise<BaseResponse<Rever
 // Supprimer un reversement
 export const deleteReversement = async (id: string): Promise<BaseResponse<ReversementData>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/reversement/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/reversement/${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -82,11 +79,10 @@ export const deleteReversement = async (id: string): Promise<BaseResponse<Revers
 // Récupérer les reversements d’un producteur
 export const getReversementsByProducer = async (producerId: string, page: number, limit: number): Promise<BaseResponse<Pagination<ReversementData>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/reversement/producer/${producerId}?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/reversement/producer/${producerId}?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -100,11 +96,10 @@ export const getReversementsByProducer = async (producerId: string, page: number
 // Statistiques globales des reversements et gains
 export const getReversementStats = async (): Promise<BaseResponse<ReversementStats>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/reversement/stats/total-gains`, {
+        const response = await secureFetch(`${getBaseUrl()}/reversement/stats/total-gains`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 

@@ -28,6 +28,7 @@ export enum TypeCompte {
     SUPPERVISEUR,
     UTILISATEUR,
 }
+
 export enum AllRole {
     ADMIN,
     USER,

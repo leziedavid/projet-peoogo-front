@@ -4,6 +4,7 @@
 import { refreshAccessToken } from '@/api/services/auth'
 // Import de la fonction qui appelle l'API backend pour rafraîchir le token
 import { jwtDecode, JwtPayload } from 'jwt-decode'
+import { toast } from 'sonner'
 
 export enum Role {
     ADMIN = 'ADMIN',
@@ -51,25 +52,38 @@ const isTokenValid = (token: string): boolean => {
     }
 }
 
+let refreshTokenPromise: Promise<string | null> | null = null;
+
 const tryRefreshAccessToken = async (): Promise<string | null> => {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) return null;
 
-    // Tente de rafraîchir le token d'accès à partir du refresh_token stocké
-    const refreshToken = localStorage.getItem('refresh_token') // Récupère le refresh_token
-    if (!refreshToken) return null // Pas de refresh_token => impossible de rafraîchir
+    // 🔄 Une autre tentative est en cours ? => on attend
+    if (refreshTokenPromise) return refreshTokenPromise;
 
-    try {
-        const response = await refreshAccessToken(refreshToken) // Appel API backend pour rafraîchir
-        if (response.statusCode === 200 && response.data?.access_token) {
-            // Si succès, stocke le nouveau access_token en localStorage
-            localStorage.setItem('access_token', response.data.access_token)
-            return response.data.access_token // Retourne le nouveau token
+    // 🔐 Lancer le refresh (et que 1 fois)
+    refreshTokenPromise = (async () => {
+        try {
+            const response = await refreshAccessToken(refreshToken);
+            if (response.statusCode === 200 && response.data?.access_token) {
+                localStorage.setItem('access_token', response.data.access_token);
+                return response.data.access_token;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            toast.error('Erreur lors du rafraîchissement de la session. Veuillez vous reconnecter.');
+            console.error('Erreur lors du refresh token :', error);
+            return null;
+        } finally {
+            // 🔓 Libérer la promesse une fois terminée
+            refreshTokenPromise = null;
         }
-    } catch (error) {
-        console.error('Erreur lors du refresh token :', error) // Log erreur si echec appel API
-    }
+    })();
 
-    return null // En cas d'échec, retourne null
-}
+    return refreshTokenPromise;
+};
+
 
 export const useAuthMiddleware = async (): Promise<DecodedToken | null> => {
     // Fonction principale qui contrôle l’authentification et rafraîchit le token si besoin
@@ -178,12 +192,16 @@ export const isUserAuthenticated = async (): Promise<boolean> => {
     return true
 }
 
+let isLoggingOut = false
+
 export const logout = (): void => {
-    // Fonction de déconnexion qui supprime les tokens et redirige vers login
+    if (isLoggingOut) return; // Si déjà en cours, on quitte
+    isLoggingOut = true; // On active le verrou
     if (typeof window !== 'undefined') {
-        localStorage.removeItem('access_token') // Supprime access_token
-        localStorage.removeItem('refresh_token') // Supprime refresh_token
-        window.location.href = '/auth/login' // Redirige vers la page de connexion
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        refreshTokenPromise = null; // 🔓 on reset la promesse
+        window.location.href = '/auth/login'; // Redirige vers login
     }
 }
 
@@ -203,6 +221,7 @@ export const isSessionStillValid = async (): Promise<boolean> => {
     const refreshToken = localStorage.getItem('refresh_token')
     if (!refreshToken) {
         // Aucun refresh_token présent
+        logout();
         return false
     }
 
@@ -210,13 +229,14 @@ export const isSessionStillValid = async (): Promise<boolean> => {
     try {
         const decodedRefresh = jwtDecode<JwtPayload>(refreshToken)
         const currentTime = Math.floor(Date.now() / 1000)
-
         if (!decodedRefresh.exp || decodedRefresh.exp <= currentTime) {
             // refresh_token expiré
+            logout();
             return false
         }
     } catch {
         // Erreur lors du décodage du refresh_token
+        logout();
         return false
     }
 

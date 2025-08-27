@@ -5,12 +5,12 @@ import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import EnrollementForm from '@/components/form/EnrollementForm';
 import { getUserName, getUserRole, isSessionStillValid } from '@/app/middleware';
-import EnrollementLogin from '@/components/form/EnrollementLogin';
+// import EnrollementLogin from '@/components/form/EnrollementLogin';
 import { getPaginatedByAgent } from '@/api/services/enrollementsServices';
 import { EnrollementData } from '@/types/ApiReponse/enrollementControleResponse';
 import { EnrollementRequest } from '@/types/ApiRequest/EnrollementRequest';
 import RelaisForm from '@/components/form/RelaisForm';
-
+import { useRouter } from 'next/navigation';
 const Page = () => {
 
     const [activeTab, setActiveTab] = useState('ENROLEMENT REJETER');
@@ -25,7 +25,7 @@ const Page = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [limit] = useState(5);
     const [loading, setLoading] = useState(false);
-    // État pour stocker l'enrôlement sélectionné
+    const router = useRouter();
     const [selectedEnrollement, setSelectedEnrollement] = useState<EnrollementRequest | null>(null);
 
     const tabs = [
@@ -34,30 +34,28 @@ const Page = () => {
         { id: 'RELAIS ET POINTS FAUCAUX', label: 'RELAIS ET POINTS FAUCAUX', badge: null },
     ];
 
-    // 🔄 Vérifie la session au montage et à chaque changement de loginStateChange
-    const checkSession = async () => {
-        const valid = await isSessionStillValid();
-        setIsLoggedIn(valid);
-        if (!valid) {
-            setLoginModalOpen(true); // Ouvre automatiquement le modal si non connecté
-        }
-    };
     const checkUserInfo = async () => {
+        let verif = await isSessionStillValid();
+        console.log("Session valid:", verif);
+
+        if (!verif) {
+            setIsLoggedIn(false);
+        } else {
+            setIsLoggedIn(true);
+        }
+
         const user = await getUserName();
         if (user) {
             setUserName(user);
         }
-    };
 
-    const checkUserRole = async () => {
         const role = await getUserRole();
         if (role) {
             setUserRole(role);
         }
-
     };
 
-    useEffect(() => { checkSession(); checkUserInfo(); checkUserRole(); }, [loginStateChange]);
+    useEffect(() => { checkUserInfo() }, [loginStateChange]);
 
     const handleLoginSuccess = () => {
         setLoginStateChange(!loginStateChange); // Déclenche une revalidation
@@ -128,24 +126,21 @@ const Page = () => {
         setSelectedEnrollement(formatted);
         setActiveTab('FORMULAIRE');
     };
-    
 
     const renderTabContent = () => {
         switch (activeTab) {
 
             case 'ENROLEMENT REJETER':
                 return (
-
                     <div className="bg-white rounded-lg p-6">
                         <h3 className="text-lg text-[#B07B5E] font-semibold  mb-4">Enrôlements Rejetés</h3>
                         <p className=" mb-4">Liste des enrôlement rejetées.</p>
                         <div className="space-y-3">
-                            {/* faire le map ici */}
 
                             {listes.map((enrolement) => {
                                 const createdAt = new Date(enrolement.createdAt);
                                 return (
-                                    <div key={enrolement.id || enrolement.code}  className="border-l-4 border-red-500 bg-red-50 p-4 rounded mb-3 cursor-pointer"
+                                    <div key={enrolement.id || enrolement.code} className="border-l-4 border-red-500 bg-red-50 p-4 rounded mb-3 cursor-pointer"
                                         onClick={() => handleSelectEnrollement(enrolement)}>
                                         <h4 className="font-medium text-red-800">{enrolement.code}</h4>
                                         <p className="text-sm text-red-600"> {enrolement.status_dossier ?? "Statut inconnu"} / {enrolement.commentaire_controle ?? "Aucun commentaire"}</p>
@@ -160,21 +155,14 @@ const Page = () => {
 
                         </div>
                     </div>
-
                 );
             case 'FORMULAIRE':
 
                 return (
-                    <div className="">
-                        <EnrollementForm initialValues={selectedEnrollement || {}} />
-                    </div>
+                    <div className=""> <EnrollementForm initialValues={selectedEnrollement || {}} setActiveTab={setActiveTab} /> </div>
                 );
             case 'RELAIS ET POINTS FAUCAUX':
-                return (
-                        <div className="">
-                            <RelaisForm />
-                        </div>
-                )
+                return (<div className=""> <RelaisForm /> </div>);
             default:
                 return null;
         }
@@ -195,20 +183,15 @@ const Page = () => {
                 <p className="text-gray-500 mb-4">
                     Veuillez cliquer sur le bouton ci-dessous pour vous connecter avec votre code d'enrôlement.
                 </p>
-                <button onClick={() => setLoginModalOpen(true)} className="text-white bg-[#B07B5E] hover:bg-green-700 font-medium rounded-lg text-sm px-6 py-2" >
+                <button onClick={() => router.push('/auth/login')} className="text-white bg-[#B07B5E] hover:bg-green-700 font-medium rounded-lg text-sm px-6 py-2" >
                     Se connecter
                 </button>
 
                 {/* Modal de connexion */}
-                <EnrollementLogin
-                    isOpen={loginModalOpen}
-                    onClose={() => setLoginModalOpen(false)}
-                    state={loginStateChange}
-                />
+                {/* <EnrollementLogin isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} state={loginStateChange} /> */}
             </div>
         );
     }
-
 
     return (
 
@@ -230,10 +213,7 @@ const Page = () => {
                     <div className=" border-gray-200">
                         <nav className="flex flex-wrap justify-center gap-2 p-4">
                             {tabs.map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${activeTab === tab.id ? 'bg-[#B07B5E] text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} >
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${activeTab === tab.id ? 'bg-[#B07B5E] text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} >
                                     {tab.label}
                                     {tab.badge && (
                                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -253,11 +233,7 @@ const Page = () => {
             </div>
 
             {/* Modal connexion (au cas où l'utilisateur le referme manuellement mais veut se reconnecter) */}
-            <EnrollementLogin
-                isOpen={loginModalOpen}
-                onClose={() => setLoginModalOpen(false)}
-                state={loginStateChange}
-            />
+            {/* <EnrollementLogin isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} state={loginStateChange} /> */}
 
         </div>
 

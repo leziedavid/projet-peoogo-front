@@ -9,16 +9,16 @@ import { BaseResponse } from '@/types/BaseResponse'
 import { getBaseUrl } from '@/types/baseUrl'
 import { Pagination } from '@/types/pagination'
 import { tr } from 'date-fns/locale'
+import { secureFetch } from './auth'
 
 // getUserEnrollementDataByCode
 
 export const getUserEnrollementDataByCode = async (code: string): Promise<BaseResponse<UserEnrollementData>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/parametres/code/${code}`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/parametres/code/${code}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -33,11 +33,8 @@ export const getUserEnrollementDataByCode = async (code: string): Promise<BaseRe
 export const createProduct = async (formData: FormData): Promise<BaseResponse<Product>> => {
     console.log('🚀 FormData view:', formData);
     try {
-        const response = await fetch(`${getBaseUrl()}/product`, {
+        const response = await secureFetch(`${getBaseUrl()}/product`, {
             method: 'POST',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-            },
             body: formData, // ✅ envoyer le FormData tel quel
         })
         return await response.json()
@@ -50,11 +47,8 @@ export const createProduct = async (formData: FormData): Promise<BaseResponse<Pr
 // 'Mettre à jour un produit
 export const updateProduct = async (id: string, formData: FormData): Promise<BaseResponse<Product>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/${id}`, {
             method: 'PATCH',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-            },
             body: formData, // ✅ envoyer le FormData tel quel
         })
         return await response.json()
@@ -67,11 +61,10 @@ export const updateProduct = async (id: string, formData: FormData): Promise<Bas
 // 'Supprimer un produit'
 export const deleteProduct = async (id: string): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
         return await response.json()
@@ -86,11 +79,10 @@ export const getProductById = async (id: string): Promise<BaseResponse<Product>>
     try {
         if (!id) throw new Error('ID du produit manquant')
 
-        const response = await fetch(`${getBaseUrl()}/produit/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/produit/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -105,11 +97,10 @@ export const getProductById = async (id: string): Promise<BaseResponse<Product>>
 // getAllProducts
 export const getAllProducts = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/produits?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/produits?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -123,11 +114,10 @@ export const getAllProducts = async (page: number = 1, limit: number = 10): Prom
 // getAllProductsIsActive
 export const getAllProductsIsActive = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/produits/actives/liste?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/produits/actives/liste?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -141,11 +131,10 @@ export const getAllProductsIsActive = async (page: number = 1, limit: number = 1
 // getAllProductsWithStatus
 export const getAllProductsWithStatus = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/produits/admin/liste?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/produits/admin/liste?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -158,11 +147,10 @@ export const getAllProductsWithStatus = async (page: number = 1, limit: number =
 
 export const getAllProductsWithStatusOne = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/listes/produits-avec-statut?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/listes/produits-avec-statut?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -176,11 +164,10 @@ export const getAllProductsWithStatusOne = async (page: number = 1, limit: numbe
 
 export const geProduitstById = async (id: string): Promise<BaseResponse<Product>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/get-produit/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/get-produit/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -194,11 +181,10 @@ export const geProduitstById = async (id: string): Promise<BaseResponse<Product>
 // all/produits-admin
 export const getAllProductsAdmin = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/all/produits-admin?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/all/produits-admin?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -213,11 +199,10 @@ export const getAllProductsAdmin = async (page: number = 1, limit: number = 10):
 export const getProducteurProductsByCode = async (code: string, page: number, limit: number): Promise<BaseResponse<Pagination<Product>>> => {
     try {
 
-        const response = await fetch(`${getBaseUrl()}/product/donnees/produit-produiteur?page=${page}&limit=${limit}&code=${code}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/donnees/produit-produiteur?page=${page}&limit=${limit}&code=${code}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -233,11 +218,10 @@ export const getProducteurProductStats = async (code: string): Promise<BaseRespo
     try {
         // if (!code) throw new Error('Code produit manquant')
 
-        const response = await fetch(`${getBaseUrl()}/product/produit-produiteur/statistiques/${code}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/produit-produiteur/statistiques/${code}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -252,11 +236,10 @@ export const getProducteurProductStats = async (code: string): Promise<BaseRespo
 // getGlobalProductStats
 export const getGlobalProductStats = async (): Promise<BaseResponse<StatistiquesDesProduitsResponse>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/lites/produit-global-admin-all`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/lites/produit-global-admin-all`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
 
             },
         })
@@ -274,11 +257,10 @@ export const getGlobalProductStats = async (): Promise<BaseResponse<Statistiques
 
 export const filterProductsWithStatus = async (data: Filtre, page: number, limit: number): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/filter-produits-with-status?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/filter-produits-with-status?page=${page}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify(data),
         })
@@ -293,10 +275,9 @@ export const filterProductsWithStatus = async (data: Filtre, page: number, limit
 // ✅ Mettre à jour la période de disponibilité
 export const updateProductAvailability = async (productId: string, disponibleDe: string, disponibleJusqua: string): Promise<BaseResponse<Product>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/${productId}/availability`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/${productId}/availability`, {
             method: 'PATCH',
             headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ disponibleDe, disponibleJusqua }),
@@ -311,10 +292,9 @@ export const updateProductAvailability = async (productId: string, disponibleDe:
 // ✅ Mettre à jour la quantité
 export const updateProductQuantity = async (productId: string, quantite: number): Promise<BaseResponse<Product>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/${productId}/quantity/update`, {
+        const response = await secureFetch(`${getBaseUrl()}/product/${productId}/quantity/update`, {
             method: 'PATCH',
             headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ quantite }),

@@ -1,10 +1,25 @@
-import { getUserId } from '@/app/middleware'
+import { getUserId, isSessionStillValid } from '@/app/middleware'
 import { UserData } from '@/types/ApiReponse/UserDataResponse'
 import { User } from '@/types/ApiReponse/UsersResponse'
 import { LoginDto, RefreshTokenResponse, RegisterDto, UserAuth } from '@/types/ApiRequest/Auth'
 import { BaseResponse } from '@/types/BaseResponse'
 import { getBaseUrl } from '@/types/baseUrl'
 import { toast } from 'sonner'
+
+
+export const secureFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+    // ✅ Vérifie que la session est toujours valide (déconnexion gérée dedans)
+    await isSessionStillValid();
+    // ✅ Récupère le token valide
+    const token = localStorage.getItem('access_token') || '';
+    // ✅ Ajoute automatiquement le header Authorization
+    const headers = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+    };
+
+    return fetch(url, { ...options, headers });
+};
 
 // Connexion : accepte email OU phoneNumber
 export const signIn = async (loginData: Partial<LoginDto>): Promise<BaseResponse<UserAuth>> => {
@@ -75,11 +90,8 @@ export const signUp = async (registerData: FormData): Promise<BaseResponse<any>>
 
 export const updateUser = async (id: string, formData: FormData): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/update/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/update/${id}`, {
             method: 'PATCH',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-            },
             body: formData,
         });
         return await response.json()
@@ -90,43 +102,13 @@ export const updateUser = async (id: string, formData: FormData): Promise<BaseRe
 }
 
 
-// ajouter un utilisateur par un partenaire
-export const addDriverByPartner = async (registerData: FormData): Promise<BaseResponse<any>> => {
-    try {
-        // Récupération de l'ID utilisateur (partnerId)
-        const userId = await getUserId();
-
-        if (!userId) {
-            toast.error("Vous n'êtes pas autorisé à ajouter un chauffeur");
-            throw new Error("ID utilisateur manquant");
-        }
-
-        const response = await fetch(`${getBaseUrl()}/auth/partner/add-driver/one`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
-            },
-            body: registerData,
-        });
-
-        return await response.json()
-
-
-    } catch (error: any) {
-
-        toast.error("Erreur réseau ou serveur.");
-        throw error;
-    }
-};
-
 // auth/userdata
 export const getUserInfos = async (): Promise<BaseResponse<User>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/userdata`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/userdata`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -145,11 +127,10 @@ export const getUserInfos = async (): Promise<BaseResponse<User>> => {
 
 export const getUserAllData = async (): Promise<BaseResponse<UserData>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/parametres/user/infos`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/parametres/user/infos`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
 
@@ -163,11 +144,8 @@ export const getUserAllData = async (): Promise<BaseResponse<UserData>> => {
 // @Patch('users/files/update')
 export const updateFiles = async (formData: FormData): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/users/files/update`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/users/files/update`, {
             method: 'PATCH',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-            },
             body: formData,
         });
 
@@ -182,11 +160,10 @@ export const updateFiles = async (formData: FormData): Promise<BaseResponse<any>
 // @Patch('users/profile/update/data')
 export const updateProfile = async (data: any): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/users/profile/update/data`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/users/profile/update/data`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify(data), // ✅ transforme bien l'objet en JSON
         });
@@ -201,11 +178,10 @@ export const updateProfile = async (data: any): Promise<BaseResponse<any>> => {
 // validateCompte
 export const validateCompte = async (userId: string, status: string): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/validate/${userId}/${status}`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/validate/${userId}/${status}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         })
         return await response.json()
@@ -260,16 +236,15 @@ export const loginWithPhone = async (phoneNumber: string, password: string): Pro
 // 🗑️ Suppression d'un utilisateur (avec CASCADE automatique)
 export const deleteUser = async (userId: string): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/delete/${userId}`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/delete/${userId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
             toast.success("Utilisateur supprimé avec succès");
         }
@@ -285,11 +260,10 @@ export const deleteUser = async (userId: string): Promise<BaseResponse<any>> => 
 // 🗑️ Suppression de son propre compte
 export const deleteMyAccount = async (): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/delete/my/account`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/delete/my/account`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -299,7 +273,7 @@ export const deleteMyAccount = async (): Promise<BaseResponse<any>> => {
         }
 
         const result = await response.json();
-        
+
         if (result.success) {
             toast.success("Votre compte a été supprimé avec succès");
             // Nettoyer le localStorage
@@ -338,7 +312,7 @@ export const deleteMultipleUsers = async (userIds: string[]): Promise<BaseRespon
         }
 
         const result = await response.json();
-        
+
         if (result.success) {
             toast.success(`${userIds.length} utilisateur(s) supprimé(s) avec succès`);
         }
@@ -351,15 +325,13 @@ export const deleteMultipleUsers = async (userIds: string[]): Promise<BaseRespon
     }
 }
 
-
 // 🗑️ Désactivation d'un utilisateur (alternative à la suppression définitive)
 export const deactivateUser = async (userId: string, reason?: string): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/auth/deactivate/${userId}`, {
+        const response = await secureFetch(`${getBaseUrl()}/auth/deactivate/${userId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify({ reason }),
         });
@@ -370,7 +342,7 @@ export const deactivateUser = async (userId: string, reason?: string): Promise<B
         }
 
         const result = await response.json();
-        
+
         if (result.success) {
             toast.success("Utilisateur désactivé avec succès");
         }
@@ -382,8 +354,6 @@ export const deactivateUser = async (userId: string, reason?: string): Promise<B
         throw error;
     }
 }
-
-
 
 // Mot de passe oublié - Envoi du code
 export const sendForgotPasswordCode = async (email: string): Promise<BaseResponse<{ code?: string }>> => {

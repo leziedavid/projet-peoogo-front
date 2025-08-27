@@ -198,14 +198,14 @@ export function FileUploader({
 
                 <div className="flex flex-col items-center gap-4 w-full">
                     {/* Input Caméra */}
-                    <label className="w-full cursor-pointer border border-dashed rounded-lg px-5 py-6 text-center flex flex-col items-center justify-center gap-2 hover:bg-muted/20 transition">
+                    <label className="w-full cursor-pointer border border-dashed rounded-lg px-5 py-3 text-center flex flex-col items-center justify-center gap-2 hover:bg-muted/20 transition">
                         <Camera className="w-6 h-6 text-muted-foreground" />
                         <span className="font-medium">Prendre une photo</span>
                         <input type="file" accept="image/*" capture="environment" multiple={multiple} className="hidden" onChange={(e) => handleFiles(e.target.files)} />
                     </label>
 
                     {/* Input Galerie */}
-                    <label className="w-full cursor-pointer border border-dashed rounded-lg px-5 py-6 text-center flex flex-col items-center justify-center gap-2 hover:bg-muted/20 transition">
+                    <label className="w-full cursor-pointer border border-dashed rounded-lg px-5 py-3 text-center flex flex-col items-center justify-center gap-2 hover:bg-muted/20 transition">
                         <ImageIcon className="w-6 h-6 text-muted-foreground" />
                         <span className="font-medium">Choisir depuis la galerie</span>
                         <input type="file" accept="image/*" multiple={multiple} className="hidden" onChange={(e) => handleFiles(e.target.files)} />

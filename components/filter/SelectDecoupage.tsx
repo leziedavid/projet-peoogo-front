@@ -12,6 +12,7 @@ import {
 import SearchableSelect from './SearchableSelect';
 import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
 import { Button } from '../ui/button';
+import { toast } from 'sonner';
 
 interface SelectOption {
     id: string;
@@ -125,7 +126,7 @@ export default function SelectDecoupage({ onChange }: SelectDecoupageProps) {
             Object.entries(decoupage).filter(([key, value]) => value)
         );
         localStorage.setItem(LOCALSTORAGE_DECOUPAGE_KEY, JSON.stringify(cleaned));
-        alert('Découpage sauvegardé localement !');
+        toast.success('Découpage sauvegardé localement !');
         setIsLocked(true);
     };
 
@@ -133,7 +134,7 @@ export default function SelectDecoupage({ onChange }: SelectDecoupageProps) {
         setDecoupage({});
         localStorage.removeItem(LOCALSTORAGE_DECOUPAGE_KEY);
         setIsLocked(false);
-        alert('Découpage réinitialisé !');
+        toast.success('Découpage réinitialisé !');
     };
 
     if (isLoading) return <div className="p-4 text-center">Chargement du découpage...</div>;
@@ -171,8 +172,7 @@ export default function SelectDecoupage({ onChange }: SelectDecoupageProps) {
                 </Button>
 
                 <Button type="button" onClick={resetDecoupage} variant="ghost" className="gap-2 text-red-600" disabled={!decoupage.districtId}>
-                    <OctagonX size={32} />
-                    Réinitialiser
+                    <OctagonX size={50} />
                 </Button>
             </CardFooter>
         </Card>

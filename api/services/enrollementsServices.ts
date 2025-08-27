@@ -8,6 +8,7 @@ import { getBaseUrl } from '@/types/baseUrl'
 import { Pagination } from '@/types/pagination'
 import { tr } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { secureFetch } from './auth'
 
 // get allActivite
 
@@ -136,12 +137,8 @@ export const getAllLocalites = async (): Promise<BaseResponse<LocaliteResponse[]
 // posteEnrollements
 export const createEnrollement = async (formData: FormData): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements`, {
             method: 'POST',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-                // Pas besoin de 'Content-Type': multipart/form-data → géré automatiquement par FormData
-            },
             body: formData,
         });
 
@@ -154,12 +151,8 @@ export const createEnrollement = async (formData: FormData): Promise<BaseRespons
 
 export const updateEnrollement = async (id: string, formData: FormData): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/${id}`, {
             method: 'PATCH',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-                // multipart/form-data → ne surtout pas définir le Content-Type manuellement
-            },
             body: formData,
         });
 
@@ -172,11 +165,8 @@ export const updateEnrollement = async (id: string, formData: FormData): Promise
 
 export const deleteEnrollement = async (id: string): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/${id}`, {
             method: 'DELETE',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-            },
         });
 
         return await response.json();
@@ -204,12 +194,9 @@ export const getEnrollementsById = async (id: string) => {
 // getAllEnrollements
 export const getAllEnrollements = async (): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-            },
+            headers: { 'Content-Type': 'application/json' }
         });
 
         return await response.json();
@@ -221,11 +208,10 @@ export const getAllEnrollements = async (): Promise<BaseResponse<any>> => {
 
 export const getAllEnrollementsByPage = async (page: number, limit: number): Promise<BaseResponse<Pagination<any>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -240,11 +226,10 @@ export const getAllEnrollementsByPage = async (page: number, limit: number): Pro
 export const getAllPaginate = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<EnrollementData>>> => {
 
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/paginates/listes/one/paginate-all?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/paginates/listes/one/paginate-all?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -262,11 +247,10 @@ export const getAllPaginate = async (page: number = 1, limit: number = 10): Prom
 export const assignLotIfNeeded = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<EnrollementData>>> => {
 
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/paginate/liste/all?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/paginate/liste/all?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 
@@ -279,12 +263,8 @@ export const assignLotIfNeeded = async (page: number = 1, limit: number = 10): P
 
 export const updateEnrollementPartialData = async (id: string, formData: any): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/${id}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/${id}`, {
             method: 'PATCH',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
-                // multipart/form-data → ne surtout pas définir le Content-Type manuellement
-            },
             body: formData,
         });
 
@@ -385,14 +365,12 @@ export const getLocalitesBySousPrefecture = async (sousPrefectureId: string): Pr
     }
 };
 
-
 export const controlEnrollement = async ( id: string,payload: {sexe : string, status_dossier: string, commentaire_controle?: string, numeroLot?: string }): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/${id}/controle`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/${id}/controle`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify(payload),
         });
@@ -410,11 +388,10 @@ export const controlEnrollement = async ( id: string,payload: {sexe : string, st
 
 export const filterEnrollementsTableau = async (filters: FilterRequest, page: number, limit: number): Promise<BaseResponse<Pagination<EnrollementData>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/admin/filter/modeAffichage/params?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/admin/filter/modeAffichage/params?page=${page}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify(filters),
         });
@@ -448,11 +425,10 @@ export const filterEnrollementsmodeCarte = async (filters: FilterRequest, page: 
 
 export const filterEnrollementsmodeGraphique = async (filters: FilterRequest, page: number, limit: number): Promise<BaseResponse<EnrollementStatByDate[]>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/admin/filter/modeAffichage/params?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/admin/filter/modeAffichage/params?page=${page}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify(filters),
         });
@@ -470,11 +446,10 @@ export const filterEnrollementsmodeGraphique = async (filters: FilterRequest, pa
 
 export const getStatistiquesControle = async (numero_lot?: string): Promise<BaseResponse<any>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/stats/controle${numero_lot ? `?numero_lot=${numero_lot}` : ''}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/stats/controle${numero_lot ? `?numero_lot=${numero_lot}` : ''}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
         return await response.json();
@@ -489,11 +464,10 @@ export const getStatistiquesControle = async (numero_lot?: string): Promise<Base
 export const getStatsAdmin = async (filters: FilterRequest): Promise<BaseResponse<any>> => {
 
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/stats/admin`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/stats/admin`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
             body: JSON.stringify(filters),
         });
@@ -505,20 +479,14 @@ export const getStatsAdmin = async (filters: FilterRequest): Promise<BaseRespons
         throw error;
     }
 
-
-
-
 };
-
-
 
 export const getPaginatedByAgent = async (page: number, limit: number): Promise<BaseResponse<Pagination<EnrollementData>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/enrollements/liest/enrollement/paginate/by-agent?page=${page}&limit=${limit}`, {
+        const response = await secureFetch(`${getBaseUrl()}/enrollements/liest/enrollement/paginate/by-agent?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
             },
         });
 

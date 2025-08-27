@@ -1,4 +1,4 @@
-'use client';
+// 'use client';
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,15 +13,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Camera } from "lucide-react";
 import { FileUploader } from "../upload/FileUploader";
 import { ProductsRequest } from "@/types/ApiRequest/ProductsRequest";
-import { Decoupage, TypeCompte } from "@/types/ApiRequest/EnrollementRequest";
+import { TypeCompte } from "@/types/ApiRequest/EnrollementRequest";
 import { UserEnrollementData } from "@/types/ApiReponse/userEnrollementData";
 import { SubmitHandler } from "react-hook-form";
 import { createProduct, updateProduct } from "@/api/services/productServices";
-import { toast } from "sonner";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { NotificationModal } from "../Dialog/NotificationModal";
+import { tr } from "date-fns/locale";
 const RichTextEditor = dynamic(() => import("../rich-text-editor"), { ssr: false });
-
 
 const venteTypes = ["vente en gros", "vente en unité"];
 const paymentMethods = ["Mobile Money", "Espèces", "Carte Bancaire"];
@@ -75,6 +75,10 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
     const [previewData, setPreviewData] = useState<ProductsRequest | null>(null);
     const [files, setFiles] = useState<Record<string, File[]>>({});
     const [progresses, setProgresses] = useState<Record<string, Record<string, number>>>({});
+    const [open, setOpen] = useState(false);
+    const [notifications, setNotifications] = useState<string>("");
+    const [statusCode, setStatusCode] = useState<number | null>(null);
+
     const [decoupage, setDecoupage] = useState({
         districtId: '',
         regionId: '',
@@ -222,25 +226,41 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
             if (initialValues?.id) {
                 const res = await updateProduct(initialValues?.id, formData);
                 if (res.statusCode === 200) {
-                    toast.success(res.message);
-                    fechproductsByCode();
-                    setActiveTab('liste');
+                    setNotifications(res.message);
+                    setStatusCode(res.statusCode);
+                    setOpen(true);
+                    // toast.success(res.message);
+                    // fechproductsByCode();
+                    // setActiveTab('liste');
                 } else {
-                    toast.error(res.message);
+                    setNotifications(res.message);
+                    setStatusCode(res.statusCode);
+                    setOpen(true);
+
+                    // toast.error(res.message);
                 }
             } else {
 
                 const res = await createProduct(formData);
                 if (res.statusCode === 201) {
-                    toast.success(res.message);
-                    fechproductsByCode();
+                    setNotifications(res.message);
+                    setStatusCode(res.statusCode);
+                    setOpen(true);
+                    // toast.success(res.message);
+                    // fechproductsByCode();
                     setActiveTab('liste');
                 } else {
-                    toast.error(res.message);
+                    setNotifications(res.message);
+                    setStatusCode(res.statusCode);
+                    setOpen(true);
+                    // toast.error(res.message);
                 }
             }
 
         } catch (error) {
+            setNotifications("Erreur lors de la création du produit veuillez actualisé et réessayer");
+            setStatusCode(500);
+            setOpen(true);
             console.error('Erreur lors de la création du produit :', error);
         }
 
@@ -250,7 +270,9 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
 
     return (
         <>
+
             <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-6 mb-2">
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div className="md:col-span-2">
@@ -407,13 +429,6 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                         )}
                     </div>
 
-                    {/*
-                    <div className="md:col-span-2">
-                        <Label className="mb-2">Description *</Label>
-                        <Textarea {...register("description")} placeholder="Décrire votre produit..." className="w-full" />
-                        {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
-                    </div> */}
-
                 </div>
 
                 <Card>
@@ -490,10 +505,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                 </Card>
 
                 <div className="flex flex-col md:flex-row gap-4 pt-4 mb-4">
-                    <Button
-                        type="button"
-                        onClick={onPreview}
-                        className="w-full md:w-auto bg-gray-500 hover:bg-gray-600" >
+                    <Button type="button" onClick={onPreview} className="w-full md:w-auto bg-gray-500 hover:bg-gray-600" >
                         Prévisualiser
                     </Button>
                     <Button type="submit" disabled={!isValid} className="w-full md:w-auto bg-[#B07B5E]" >
@@ -527,6 +539,18 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                     </ul>
                 </div>
             )}
+
+            {open && (
+                <NotificationModal
+                    open={open}
+                    onClose={() => setOpen(false)}
+                    message={notifications}
+                    getAllData={fechproductsByCode}
+                    statusCode={statusCode}
+                    step={() => setActiveTab('liste')} // ✅ ici
+                />
+            )}
+
         </>
     );
 }
