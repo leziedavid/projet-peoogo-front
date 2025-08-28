@@ -1,12 +1,12 @@
 version: "3.8"
 
 services:
-  frontend_app:
+  frontend-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: frontend_app
-    image: frontend_app_image
+    container_name: frontend-app
+    image: frontend-app-image
     ports:
       - "3000:3000"
     volumes:
@@ -16,8 +16,9 @@ services:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "ta_valeur_ici"
       CLERK_SECRET_KEY: "ta_valeur_ici"
       SIGNING_SECRET: "ta_valeur_ici"
-      NEXT_PUBLIC_WS_URL: "http://109.199.107.23:4000/api/v1"  # utiliser le nom du conteneur backend
-      NEXT_PUBLIC_SERVEUR_URL: "http://109.199.107.23:4000/api/v1"
+      NEXT_PUBLIC_WS_URL: "https://api.peoogo.com/api/v1"  # utiliser le nom du conteneur backend
+      # NEXT_PUBLIC_SERVEUR_URL: "http://109.199.107.23:4000/api/v1"
+      NEXT_PUBLIC_SERVEUR_URL: "https://api.peoogo.com/api/v1"
     restart: always
     networks:
       - microservices-net

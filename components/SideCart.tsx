@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import Image from "next/image";
 import { useCart } from "@/app/context/CartProvider";
 import { useEffect, useState } from "react";
-import { isSessionStillValid } from "@/app/middleware";
+import { getUserAllData } from "@/api/services/auth";
 
 interface Props {
   visible?: boolean;
@@ -14,13 +14,21 @@ interface Props {
 }
 
 const SideCart: React.FC<Props> = ({ visible, onRequestClose }) => {
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const getIsAuthenticated = async () => {
+
+    const res = await getUserAllData()
+    if (res.statusCode === 200 && res.data) {
+      setIsAuthenticated(true)
+    } else {
+      setIsAuthenticated(false);
+    }
+
+  };
+
   useEffect(() => {
-    const getIsAuthenticated = async () => {
-      const res = await isSessionStillValid();
-      setIsAuthenticated(res);
-    };
     getIsAuthenticated();
   }, []);
 
@@ -113,17 +121,16 @@ const SideCart: React.FC<Props> = ({ visible, onRequestClose }) => {
             </p>
           </div>
 
-          <Button
-            onClick={() => {
-              if (isAuthenticated) {
-                router.push("/checkout");
-                if (onRequestClose) onRequestClose();
-              }
-            }}
+          <Button onClick={() => {
+            if (isAuthenticated) {
+              router.push("/checkout");
+              if (onRequestClose) onRequestClose();
+            }
+          }}
             disabled={!isAuthenticated}
             className={`border py-2 w-full rounded uppercase mt-4 ${!isAuthenticated
-                ? "bg-[#B07B5E]/50 text-gray-500 cursor-not-allowed"
-                : "bg-[#B07B5E] hover:bg-[#B07B5E]/50"
+              ? "bg-[#B07B5E]/50 text-gray-500 cursor-not-allowed"
+              : "bg-[#B07B5E] hover:bg-[#B07B5E]/50"
               }`}
           >
             Passer au paiement

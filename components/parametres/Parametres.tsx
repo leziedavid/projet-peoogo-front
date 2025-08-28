@@ -18,7 +18,6 @@ import { isSessionStillValid } from "@/app/middleware"
 interface ParametresProps {
     onClose: () => void
     isOpen: boolean
-    // userData: UserData // Données de l'API
 }
 
 export default function Parametres({ onClose, isOpen }: ParametresProps) {
@@ -26,8 +25,6 @@ export default function Parametres({ onClose, isOpen }: ParametresProps) {
     const isMobile = useIsMobile()
     const [isEditing, setIsEditing] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
-    const [embouteillageSurCarte, setEmbouteillageSurCarte] = useState(true)
-    const [montrerAuConducteur, setMontrerAuConducteur] = useState(true)
 
     const [userData, setUserData] = useState<UserData>({
         id: "",
@@ -58,10 +55,10 @@ export default function Parametres({ onClose, isOpen }: ParametresProps) {
 
     // get user data
     const getParametresuserData = async () => {
+
         const res = await getUserAllData()
         if (res.statusCode === 200 && res.data) {
             setUserData(res.data);
-
             const dataToStore = {
                 wallet: res.data.wallet.balance,
                 accountNumber: res.data.wallet.accountNumber,
@@ -69,14 +66,6 @@ export default function Parametres({ onClose, isOpen }: ParametresProps) {
             localStorage.setItem('walletData', JSON.stringify(dataToStore));
         }
     }
-
-    const getIsAuthenticated = async () => {
-        const res = await isSessionStillValid()
-    }
-    
-    useEffect(() => {
-        getIsAuthenticated()
-    }, [])
 
     // États pour l'édition
     const [editData, setEditData] = useState({

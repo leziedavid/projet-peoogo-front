@@ -85,27 +85,6 @@ const tryRefreshAccessToken = async (): Promise<string | null> => {
 };
 
 
-export const useAuthMiddleware = async (): Promise<DecodedToken | null> => {
-    // Fonction principale qui contrôle l’authentification et rafraîchit le token si besoin
-    let token = getTokenFromLocalStorage() // Récupère le token actuel
-
-    if (!token || !isTokenValid(token)) {
-        // Si pas de token ou token invalide
-        const newToken = await tryRefreshAccessToken() // Tente de rafraîchir
-        if (!newToken || !isTokenValid(newToken)) {
-            // Si échec rafraîchissement ou token toujours invalide
-            localStorage.removeItem('access_token') // Supprime tokens
-            localStorage.removeItem('refresh_token')
-            window.location.href = '/auth/login' // Redirige vers la page login
-            return null
-        }
-        token = newToken // Sinon, utilise le nouveau token
-    }
-
-    return jwtDecode<DecodedToken>(token) // Decode et retourne les infos utilisateur
-}
-
-
 export const useAuthMiddlewareOne = async (): Promise<DecodedToken | null> => {
     // Fonction principale qui contrôle l’authentification et rafraîchit le token si besoin
     let token = getTokenFromLocalStorage() // Récupère le token actuel
@@ -209,44 +188,43 @@ export const logout = (): void => {
  * Vérifie si l'utilisateur est encore authentifié via access_token ou refresh_token.
  * @returns boolean : true si un token valide est présent ou récupéré, false sinon.
  */
-export const isSessionStillValid = async (): Promise<boolean> => {
-    let accessToken = getTokenFromLocalStorage()
 
-    if (accessToken && isTokenValid(accessToken)) {
-        // access_token encore valide
-        return true
+export const getRefreshTokenFromLocalStorage = (): string | null => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('refresh_token') || null
     }
-
-    // access_token invalide, on tente avec le refresh_token
-    const refreshToken = localStorage.getItem('refresh_token')
-    if (!refreshToken) {
-        // Aucun refresh_token présent
-        logout();
-        return false
-    }
-
-    // Vérification de la validité du refresh_token lui-même
-    try {
-        const decodedRefresh = jwtDecode<JwtPayload>(refreshToken)
-        const currentTime = Math.floor(Date.now() / 1000)
-        if (!decodedRefresh.exp || decodedRefresh.exp <= currentTime) {
-            // refresh_token expiré
-            logout();
-            return false
-        }
-    } catch {
-        // Erreur lors du décodage du refresh_token
-        logout();
-        return false
-    }
-
-    // Le refresh_token est valide, on tente de récupérer un nouveau access_token
-    const newAccessToken = await tryRefreshAccessToken()
-
-    if (!newAccessToken || !isTokenValid(newAccessToken)) {
-        // Impossible de rafraîchir ou nouveau token invalide
-        return false
-    }
-
-    return true
+    return null
 }
+
+export const isSessionStillValid = async (): Promise<boolean> => {
+    const accessToken = getTokenFromLocalStorage()
+    if (accessToken && isTokenValid(accessToken)) return true
+
+    const refreshToken = getRefreshTokenFromLocalStorage()
+    if (!refreshToken) return false
+
+    try {
+        const decoded = jwtDecode<JwtPayload>(refreshToken)
+        const now = Math.floor(Date.now() / 1000)
+        if (!decoded.exp || decoded.exp <= now) return false
+    } catch {
+        return false
+    }
+
+    const newAccessToken = await tryRefreshAccessToken()
+    return !!newAccessToken && isTokenValid(newAccessToken)
+}
+
+export const useAuthMiddleware = async (): Promise<DecodedToken | null> => {
+    const token = getTokenFromLocalStorage()
+    if (token && isTokenValid(token)) return jwtDecode<DecodedToken>(token)
+
+    const newToken = await tryRefreshAccessToken()
+    if (!newToken || !isTokenValid(newToken)) {
+        logout() // ici on redirige car c’est une page privée
+        return null
+    }
+
+    return jwtDecode<DecodedToken>(newToken)
+}
+

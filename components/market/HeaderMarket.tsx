@@ -3,14 +3,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';  // Import de Image de Next.js
-import {LucideHome,LucideInfo, Store, HandCoins,User, ShoppingBasket } from 'lucide-react';
+import { LucideHome, LucideInfo, Store, HandCoins, User, ShoppingBasket } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, } from "@/components/ui/navigation-menu";
 import { Menu, MoveRight, X } from "lucide-react";
 import { useCart } from '@/app/context/CartProvider';
 import SideCart from '../SideCart';
-import { getUserImageUrl, getUserName, getUserRole, isSessionStillValid } from '@/app/middleware';
 import { useRouter } from 'next/navigation'
+import { getUserAllData } from '@/api/services/auth';
 
 // Composant Header principal
 const HeaderMarket: React.FC = ({ }) => {
@@ -18,12 +18,10 @@ const HeaderMarket: React.FC = ({ }) => {
     const { countAllItems } = useCart();
     const [showSideCart, setShowSideCart] = useState(false);
     const cartItems = countAllItems();
-    // const [UserRole, setUserRole] = useState("");
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
     const [imageUrl, setImageUrl] = useState<string | null>(null)
     const [UserName, setUserName] = useState("");
-
     const [openMenu, setOpenMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -38,11 +36,6 @@ const HeaderMarket: React.FC = ({ }) => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-
-    const fetchImage = async () => {
-        const url = await getUserImageUrl()
-        setImageUrl(url)
-    }
 
     // fonction pour se déconnecter
     const logout = (): void => {
@@ -91,27 +84,23 @@ const HeaderMarket: React.FC = ({ }) => {
 
     const [isOpen, setOpen] = useState(false);
 
-    // 🔄 Vérifie la session au montage et à chaque changement de loginStateChange
-    const checkSession = async () => {
-        const valid = await isSessionStillValid();
-        setIsLoggedIn(valid);
-    };
+    const getUserAll = async () => {
 
-    const checkUserInfo = async () => {
-        const user = await getUserName();
-        if (user) {
-            setUserName(user);
+        const res = await getUserAllData()
+
+        if (res.statusCode === 200 && res.data) {
+
+            setIsLoggedIn(true)
+            setUserName(res.data.name);
+            setImageUrl(res.data.imageUrl);
+
+        } else {
+            setIsLoggedIn(false);
         }
+
     };
 
-    const checkUserRole = async () => {
-        const role = await getUserRole();
-        // if (role) {
-        //     setUserRole(role);
-        // }
-    };
-
-    useEffect(() => { checkSession(); checkUserInfo(); checkUserRole(); fetchImage(); }, []);
+    useEffect(() => { getUserAll(); }, []);
 
     return (
         <>
@@ -183,7 +172,7 @@ const HeaderMarket: React.FC = ({ }) => {
 
                             {isLoggedIn ? (
                                 <div className="relative" ref={menuRef}>
-                                    <div  className="flex items-center gap-2 cursor-pointer" onClick={() => setOpenMenu(!openMenu)} >
+                                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => setOpenMenu(!openMenu)} >
                                         <div className="w-6 h-6 relative rounded-full overflow-hidden">
                                             <Image src={imageUrl || "/IMG_5195.png"} alt={UserName || "Utilisateur"} fill className="object-cover" />
                                         </div>

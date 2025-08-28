@@ -1,4 +1,4 @@
-import { getUserId, isSessionStillValid } from '@/app/middleware'
+import {useAuthMiddleware } from '@/app/middleware'
 import { UserData } from '@/types/ApiReponse/UserDataResponse'
 import { User } from '@/types/ApiReponse/UsersResponse'
 import { LoginDto, RefreshTokenResponse, RegisterDto, UserAuth } from '@/types/ApiRequest/Auth'
@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 
 export const secureFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
     // ✅ Vérifie que la session est toujours valide (déconnexion gérée dedans)
-    await isSessionStillValid();
+    await useAuthMiddleware();
     // ✅ Récupère le token valide
     const token = localStorage.getItem('access_token') || '';
     // ✅ Ajoute automatiquement le header Authorization
@@ -105,10 +105,11 @@ export const updateUser = async (id: string, formData: FormData): Promise<BaseRe
 // auth/userdata
 export const getUserInfos = async (): Promise<BaseResponse<User>> => {
     try {
-        const response = await secureFetch(`${getBaseUrl()}/auth/userdata`, {
+        const response = await fetch(`${getBaseUrl()}/auth/userdata`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`
             },
         })
 
@@ -127,10 +128,11 @@ export const getUserInfos = async (): Promise<BaseResponse<User>> => {
 
 export const getUserAllData = async (): Promise<BaseResponse<UserData>> => {
     try {
-        const response = await secureFetch(`${getBaseUrl()}/auth/parametres/user/infos`, {
+        const response = await fetch(`${getBaseUrl()}/auth/parametres/user/infos`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`
             },
         })
 

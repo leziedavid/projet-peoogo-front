@@ -147,10 +147,12 @@ export const getAllProductsWithStatus = async (page: number = 1, limit: number =
 
 export const getAllProductsWithStatusOne = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await secureFetch(`${getBaseUrl()}/product/listes/produits-avec-statut?page=${page}&limit=${limit}`, {
+        const response = await fetch(`${getBaseUrl()}/product/listes/produits-avec-statut?page=${page}&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+
             },
         })
 
@@ -164,10 +166,11 @@ export const getAllProductsWithStatusOne = async (page: number = 1, limit: numbe
 
 export const geProduitstById = async (id: string): Promise<BaseResponse<Product>> => {
     try {
-        const response = await secureFetch(`${getBaseUrl()}/product/get-produit/${id}`, {
+        const response = await fetch(`${getBaseUrl()}/product/get-produit/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
         })
 
@@ -257,10 +260,11 @@ export const getGlobalProductStats = async (): Promise<BaseResponse<Statistiques
 
 export const filterProductsWithStatus = async (data: Filtre, page: number, limit: number): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await secureFetch(`${getBaseUrl()}/product/filter-produits-with-status?page=${page}&limit=${limit}`, {
+        const response = await fetch(`${getBaseUrl()}/product/filter-produits-with-status?page=${page}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
             body: JSON.stringify(data),
         })
