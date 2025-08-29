@@ -2,18 +2,18 @@
 const nextConfig = {
     images: {
         remotePatterns: [
-            { protocol: "https", hostname: "www.uber-assets.com" },
-            { protocol: "https", hostname: "res.cloudinary.com" },
-            { protocol: "https", hostname: "another-example.com" },
+            // Images tierces
+            { protocol: "https", hostname: "www.uber-assets.com", pathname: "/**" },
+            { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
+            { protocol: "https", hostname: "another-example.com", pathname: "/**" },
 
-            // Localhost (dev seulement)
+            // Localhost (dev)
             { protocol: "http", hostname: "localhost", pathname: "/uploads/**" },
 
             // Domaine prod (toutes les images dans /uploads)
             { protocol: "https", hostname: "api.peoogo.com", pathname: "/uploads/**" },
-            { protocol: "https", hostname: "api.peoogo.com"},
 
-            // Accès par IP (optionnel si tu veux aussi tester en direct)
+            // Accès par IP (optionnel)
             { protocol: "http", hostname: "109.199.107.23", pathname: "/uploads/**" },
             { protocol: "https", hostname: "109.199.107.23", pathname: "/uploads/**" },
         ],
@@ -26,6 +26,13 @@ const nextConfig = {
             use: ["@svgr/webpack"],
         });
         return config;
+    },
+
+    // ⚡ Optionnel : désactive l’optimisation pour toutes les images externes
+    experimental: {
+        images: {
+            unoptimized: true,
+        },
     },
 };
 
