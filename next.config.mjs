@@ -3,13 +3,18 @@ const nextConfig = {
 
     images: {
         remotePatterns: [
+            
             { protocol: "https", hostname: "www.uber-assets.com" },
             { protocol: "https", hostname: "res.cloudinary.com" },
             { protocol: "https", hostname: "another-example.com" },
-            { protocol: "http", hostname: "localhost" },
-            { protocol: 'https', hostname: 'api.peoogo.com', port: '4000', pathname: '**' },
-            { protocol: "http", hostname: "109.199.107.23", port: "4000" },
-            { protocol: "https", hostname: "api.peoogo.com", port: "4000" },
+            { protocol: "http", hostname: "localhost",port: "4000", pathname: '**' },
+
+            { protocol: 'http', hostname: 'api.peoogo.com', port: '4000', pathname: '**' },
+            { protocol: "https", hostname: "api.peoogo.com", port: "4000", pathname: '**' },
+
+            { protocol: "http", hostname: "109.199.107.23", port: "4000", pathname: '**' },
+            { protocol: "https", hostname: "109.199.107.23", port: "4000", pathname: '**' },
+
         ],
     },
 
