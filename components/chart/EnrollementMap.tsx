@@ -21,7 +21,7 @@ export default function EnrollementMap({ data }: Props) {
         return divIcon({
             className: 'custom-marker',
             html: `
-                <svg width="36" height="48" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+                <svg width="30" height="40" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg"
                     style="
                         filter: drop-shadow(0 0 6px ${fillColor}80);
                         transition: transform 0.2s ease, filter 0.2s ease;
