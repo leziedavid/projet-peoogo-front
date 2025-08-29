@@ -35,9 +35,17 @@ const partenairesParDefaut: Partenaire[] = [
         id: '2',
         nom: '',
         logo: '/partenaire/part2.jpeg',
+        alt: 'generation 1',
+        description: ''
+    },
+    {
+        id: '3',
+        nom: '',
+        logo: '/partenaire/generation.jpeg',
         alt: 'generation',
         description: ''
     },
+
 ];
 
 const NosPartenaires: React.FC<NosPartenairesProps> = ({ titre = "NOS PARTENAIRES", partenaires = partenairesParDefaut, showNavigation = true}) => {
