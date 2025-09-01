@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 
+    domains: ['api.peoogo.com', 'peoogo.com'], // Ajouter ton domaine ici
     images: {
         remotePatterns: [
             { protocol: "https", hostname: "www.uber-assets.com" },
