@@ -1,17 +1,29 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-
-    domains: ['api.peoogo.com', 'peoogo.com'], // Ajouter ton domaine ici
+    // Autoriser tous les domaines HTTP et HTTPS pour les images
     images: {
         remotePatterns: [
-            { protocol: "https", hostname: "www.uber-assets.com" },
-            { protocol: "https", hostname: "res.cloudinary.com" },
-            { protocol: "https", hostname: "another-example.com" },
-            { protocol: "http", hostname: "localhost" },
-            { protocol: "https", hostname: "api.peoogo.com", pathname: "/uploads/**" },
-            { protocol: "http", hostname: "109.199.107.23", pathname: "**" },
+            {
+                protocol: 'https',
+                hostname: '**',
+            },
+            {
+                protocol: 'http',
+                hostname: '**',
+            },
         ],
     },
+
+    // Redirection vers HTTPS (optionnel)
+    //   async redirects() {
+    //     return [
+    //       {
+    //         source: '/:path*',
+    //         destination: 'https://peoogo.com/:path*',
+    //         permanent: true,
+    //       },
+    //     ];
+    //   },
 
     webpack(config) {
         config.module.rules.push({
@@ -21,8 +33,7 @@ const nextConfig = {
         });
         return config;
     },
-
-
 };
 
+// ✅ Export correct pour ESM
 export default nextConfig;
