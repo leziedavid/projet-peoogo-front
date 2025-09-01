@@ -90,7 +90,7 @@ export default function ShowProduct() {
     const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
     const [detailProduit, setDetailProduit] = useState<Product | null>(null);
     const router = useRouter();
-    
+
     // get id by router
     const params = useParams()
     const id = params?.id as string
@@ -166,8 +166,7 @@ export default function ShowProduct() {
                         <div className="w-full min-h-screen bg-white px-4 py-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                                 <div className="flex flex-col px-2 md:px-4">
-                                    <Image src={dataImages[selectedImageIndex] || "/astronaut-grey-scale.svg"} alt={detailProduit.nom} width={400} height={400} className="rounded-2xl w-full h-auto object-cover" />
-                                    {/* Slider des thumbnails */}
+                                    <Image src={dataImages[selectedImageIndex] || "/astronaut-grey-scale.svg"} alt={detailProduit.nom} width={400} height={400} sizes="400px" className="rounded-2xl w-full h-auto object-cover" />                                    {/* Slider des thumbnails */}
                                     <div className="flex gap-2 mt-4 overflow-x-auto">
                                         {/* {detailProduit.images.map((img, index) => ( */}
                                         {dataImages.map((img, index) => (
@@ -189,7 +188,7 @@ export default function ShowProduct() {
                                     </div>
                                     <div className="grid gap-1.5 font-normal">
                                         <p className="text-sm leading-none font-medium"> Description du produit  </p>
-                                            <p dangerouslySetInnerHTML={{__html: detailProduit && detailProduit.description ? detailProduit.description : '', }} className="text-muted-foreground text-sm lowercase first-letter:uppercase">
+                                        <p dangerouslySetInnerHTML={{ __html: detailProduit && detailProduit.description ? detailProduit.description : '', }} className="text-muted-foreground text-sm lowercase first-letter:uppercase">
                                         </p>
                                     </div>
                                     <p className="text-lg font-bold text-primary">
