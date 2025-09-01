@@ -8,9 +8,8 @@ const nextConfig = {
             { protocol: "https", hostname: "res.cloudinary.com" },
             { protocol: "https", hostname: "another-example.com" },
             { protocol: "http", hostname: "localhost" },
-            { protocol: 'https', hostname: 'api.peoogo.com',pathname: '**' },
-            { protocol: 'https', hostname: 'api.peoogo.com',pathname: '/api/v1/uploads/**' },
-            { protocol: "http", hostname: "109.199.107.23",pathname: '**' },
+            { protocol: "https", hostname: "api.peoogo.com", pathname: "/uploads/**" },
+            { protocol: "http", hostname: "109.199.107.23", pathname: "**" },
         ],
     },
 
