@@ -2,31 +2,30 @@
 
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
-import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useEffect, useState } from 'react'
-import { getUserImageUrl, getUserName } from '@/app/middleware'
+import { getUserAllData } from '@/api/services/auth'
 
 export function User() {
-    
+
     const [imageUrl, setImageUrl] = useState<string | null>(null)
     const [name, setName] = useState<string | null>(null)
 
+    const getUserAll = async () => {
 
-    const fetchImage = async () => {
-        const url = await getUserImageUrl()
-        setImageUrl(url)
-    }
+        const res = await getUserAllData()
+        if (res.statusCode === 200 && res.data) {
+            setImageUrl(res.data.imageUrl);
+            setName(res.data.name);
+        } else {
+            setImageUrl(null);
+            setName(null);
+        }
 
-    const fetchName = async () => {
-        const name = await getUserName()
-        setName(name)
-        console.log(name)
-    }
-    
-    useEffect(() => {
-        fetchImage()
-        fetchName()
-    }, [])
+    };
+
+    useEffect(() => { getUserAll(); }, []);
+
 
     // fonction pour se déconnecter
     const logout = (): void => {
@@ -42,7 +41,7 @@ export function User() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
-                    <Image src={imageUrl || '/icon8.png'} width={36} height={36}  alt="Avatar" className="overflow-hidden rounded-full object-cover" />
+                    <Image src={imageUrl || '/icon8.png'} width={36} height={36} alt="Avatar" className="overflow-hidden rounded-full object-cover" unoptimized />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

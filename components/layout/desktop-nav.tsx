@@ -39,9 +39,9 @@ export default function DesktopNav({ collapsed, setCollapsed }: { collapsed: boo
         <>
 
             <aside className={`fixed inset-y-0 left-0 z-10 hidden flex-col border-r bg-background transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'} sm:flex`} >
-                <div className="flex justify-between p-2">
+                <div className="flex justify-between p-2"> 
                     <Link href="/" className="flex h-10 w-10 justify-center rounded-full bg-primary text-primary-foreground" >
-                        <Image src="/logos/Peoogo-01.png" alt="logo" width={180} height={180} className="object-contain max-h-16 md:max-h-20 px-2" priority />
+                        <Image src="/logos/Peoogo-01.png" alt="logo" width={180} height={180} className="object-contain max-h-16 md:max-h-20 px-2" priority unoptimized />
                     </Link>
                     <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} className="text-muted-foreground">
                         <PanelLeft className="h-5 w-5" />
