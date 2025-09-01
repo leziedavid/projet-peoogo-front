@@ -88,7 +88,7 @@ export default function DetailEnrollement({ initialValue, isOpen, onClose }: Enr
                                                 </Label>
                                                 <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-64">
                                                     <div className="w-full h-full bg-gradient-to-br from-red-100 to-green-100 rounded flex items-center justify-center border-2 border-dashed border-gray-300">
-                                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="w-full h-full object-cover rounded " />
+                                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="w-full h-full object-cover rounded " unoptimized/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -99,7 +99,7 @@ export default function DetailEnrollement({ initialValue, isOpen, onClose }: Enr
                                                     12. Photo du document recto
                                                 </Label>
                                                 <div className="bg-gray-100 rounded-lg p-2 flex items-center justify-center h-64">
-                                                    <Image src={document1} alt="Photo du candidat" width={180} height={180} className="w-full h-full object-cover rounded " />
+                                                    <Image src={document1} alt="Photo du candidat" width={180} height={180} className="w-full h-full object-cover rounded " unoptimized />
                                                 </div>
                                             </div>
 
@@ -109,7 +109,7 @@ export default function DetailEnrollement({ initialValue, isOpen, onClose }: Enr
                                                     12. Photo du document recto
                                                 </Label>
                                                 <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center h-64">
-                                                    <Image src={document2} alt="Photo du candidat" width={150} height={150} className="w-full h-full object-cover rounded " />
+                                                    <Image src={document2} alt="Photo du candidat" width={150} height={150} className="w-full h-full object-cover rounded " unoptimized />
                                                 </div>
                                             </div>
 

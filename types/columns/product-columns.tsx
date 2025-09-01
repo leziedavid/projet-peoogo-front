@@ -69,6 +69,7 @@ export const columns: ColumnDef<Product>[] = [
                             className="object-cover w-full h-full rounded-lg"
                             width={100}
                             height={100}
+                            unoptimized // ⚡ Permet de charger toutes les images sans restriction de domaine
                         />
                     ) : (
                         <div className="flex items-center justify-center w-full h-full text-gray-400">

@@ -63,7 +63,7 @@ const SideCart: React.FC<Props> = ({ visible, onRequestClose }) => {
                 alt=""
                 className="rounded object-cover"
                 width={60}
-                height={60}
+                height={60} unoptimized
               />
 
               {/* Infos produit */}

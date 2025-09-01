@@ -81,8 +81,7 @@ export default function HomeMarket() {
             ) : isDataEmpty ? (
 
                 <div className="flex flex-col items-center justify-center mt-10 text-center">
-                    <Image
-                        src="/error.svg"
+                    <Image src="/error.svg"
                         alt="Aucune donnée"
                         width={180}
                         height={180}
@@ -104,7 +103,7 @@ export default function HomeMarket() {
                             <div key={product.id} className="flex flex-col gap-2 cursor-pointer">
                                 <Link href={`/show/${product.id}`} passHref>
                                     <div className="relative w-full bg-muted rounded-md aspect-video mb-1 overflow-hidden w-full h-32 md:h-40">
-                                        <Image src={product.imageUrl || "/astronaut-grey-scale.svg"} alt={product.nom} className="object-cover rounded-md" fill />
+                                        <Image src={product.imageUrl || "/astronaut-grey-scale.svg"} alt={product.nom} className="object-cover rounded-md" fill unoptimized />
                                         <div className="absolute top-2 right-2">
                                             <Badge variant="secondary" className="text-xs px-2 py-1 bg-[#B07B5E] text-white">
                                                 {product.saleType}

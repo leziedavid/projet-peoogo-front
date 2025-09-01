@@ -14,16 +14,6 @@ const nextConfig = {
         ],
     },
 
-    // Redirection vers HTTPS (optionnel)
-    //   async redirects() {
-    //     return [
-    //       {
-    //         source: '/:path*',
-    //         destination: 'https://peoogo.com/:path*',
-    //         permanent: true,
-    //       },
-    //     ];
-    //   },
 
     webpack(config) {
         config.module.rules.push({

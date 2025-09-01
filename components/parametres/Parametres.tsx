@@ -203,7 +203,7 @@ export default function Parametres({ onClose, isOpen }: ParametresProps) {
                         <div className="flex justify-center">
                             <div className="relative">
                                 <Avatar className="w-24 h-24 border-4 border-gray-200">
-                                    <AvatarImage src={profileImage || userData.imageUrl || undefined} />
+                                    <AvatarImage src={profileImage || userData.imageUrl || undefined}  />
                                     <AvatarFallback className="text-gray-500 bg-gray-100 text-3xl flex items-center justify-center">
                                         <User className="w-6 h-6" />
                                     </AvatarFallback>

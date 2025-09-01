@@ -91,14 +91,8 @@ export default function RechargeWalletModal({ open, onClose, onConfirm, accountN
                             type="button"
                             onClick={() => status === 'available' && handleSelectNetwork(id)}
                             disabled={status === 'unavailable'}
-                            className={`relative flex flex-col items-center rounded-full border-2 p-2 transition
-      ${selectedNetwork === id && status === 'available'
-                                    ? 'border-green-500 shadow-md'
-                                    : 'border-transparent'}
-      ${status === 'unavailable' ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300'}
-    `}
-                            style={{ width: 70, height: 70 }}
-                        >
+                            className={`relative flex flex-col items-center rounded-full border-2 p-2 transition ${selectedNetwork === id && status === 'available' ? 'border-green-500 shadow-md' : 'border-transparent'}${status === 'unavailable' ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300'}`}
+                            style={{ width: 70, height: 70 }} >
                             <Image
                                 src={logo}
                                 alt={label}

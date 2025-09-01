@@ -164,7 +164,7 @@ export default function ChatAdmin({ onClose, isOpen, question, userId, lastOrder
                                         {message.text && <p className="text-sm whitespace-pre-line">{message.text}</p>}
                                         {message.imageUrl && (
                                             <div className="mt-2 relative w-full h-40">
-                                                <Image src={message.imageUrl} alt="Pièce jointe" fill className="object-cover rounded-md" />
+                                                <Image src={message.imageUrl} alt="Pièce jointe" fill className="object-cover rounded-md" unoptimized/>
                                             </div>
                                         )}
                                         <div className="flex justify-between mt-1 items-center text-xs text-gray-500 gap-2">
@@ -216,7 +216,7 @@ export default function ChatAdmin({ onClose, isOpen, question, userId, lastOrder
 
                     {selectedFile && (
                         <div className="relative p-4 bg-gray-50 flex items-center gap-2 h-20">
-                            <Image src={URL.createObjectURL(selectedFile)} alt="preview" width={80} height={80} className="object-cover rounded-md" />
+                            <Image src={URL.createObjectURL(selectedFile)} alt="preview" width={80} height={80} className="object-cover rounded-md" unoptimized />
                             <button onClick={() => setSelectedFile(null)} className="absolute top-2 right-2 bg-white rounded-full p-1 shadow"><X className="w-4 h-4" /></button>
                         </div>
                     )}

@@ -232,7 +232,7 @@ export default function CataloguePage() {
                                                     alt={product.nom}
                                                     width={72}
                                                     height={72}
-                                                    className="rounded-md object-cover w-20 h-20 border"
+                                                    className="rounded-md object-cover w-20 h-20 border" unoptimized
                                                 />
                                             </div>
 

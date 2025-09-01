@@ -111,10 +111,7 @@ const HeaderMarket: React.FC = ({ }) => {
                     <div className="max-w-7xl mx-4 px-4 lg:mx-auto flex justify-between items-center gap-x-10">
                         <div className="flex justify-start items-center gap-1 -ml-16"> {/* marge négative */}
                             <Link href="/" className="flex items-center">
-                                <Image src="/logos/Peoogo-01.svg" alt="logo"
-                                    width={180}
-                                    height={180} className="object-contain max-h-16 md:max-h-20 px-2"
-                                    priority />
+                                <Image src="/logos/Peoogo-01.svg" alt="logo" width={180} height={180} className="object-contain max-h-16 md:max-h-20 px-2" priority />
                             </Link>
                         </div>
 
@@ -174,7 +171,7 @@ const HeaderMarket: React.FC = ({ }) => {
                                 <div className="relative" ref={menuRef}>
                                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => setOpenMenu(!openMenu)} >
                                         <div className="w-6 h-6 relative rounded-full overflow-hidden">
-                                            <Image src={imageUrl || "/IMG_5195.png"} alt={UserName || "Utilisateur"} fill className="object-cover" />
+                                            <Image src={imageUrl || "/IMG_5195.png"} alt={UserName || "Utilisateur"} fill className="object-cover" unoptimized/>
                                         </div>
                                         <div className="hidden md:block text-sm">
                                             {UserName ? (

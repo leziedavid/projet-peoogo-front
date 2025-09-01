@@ -108,7 +108,7 @@ export default function OrderDetails({ order, isOpen, onClose }: OrderDetailsPro
                                                 {/* <pre>{JSON.stringify(item.product.imageUrl )}</pre> */}
 
                                                 <div className="w-10 h-10 relative flex-shrink-0">
-                                                    <Image src={item.product.imageUrl || "/placeholder.png"} alt="" fill className="object-cover rounded" />
+                                                    <Image src={item.product.imageUrl || "/placeholder.png"} alt="" fill className="object-cover rounded"  unoptimized/>
                                                 </div>
 
                                                 <div className="flex-1">

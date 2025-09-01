@@ -33,17 +33,8 @@ export function getUserColumns(onPreview: (url: string, isImage: boolean) => voi
             cell: ({ row }) => {
                 const image = row.original.photo;
                 return image ? (
-                    <div
-                        className="w-15 h-15 relative rounded-full overflow-hidden cursor-pointer"
-                        onClick={() => onPreview(image, true)}
-                    >
-                        <Image
-                            src={image}
-                            alt="Photo utilisateur"
-                            fill
-                            sizes="49px"
-                            className="object-cover rounded-full"
-                        />
+                    <div className="w-15 h-15 relative rounded-full overflow-hidden cursor-pointer" onClick={() => onPreview(image, true)} >
+                        <Image src={image} alt="Photo utilisateur" fill sizes="49px" className="object-cover rounded-full" unoptimized />
                     </div>
                 ) : (
                     <Badge className="bg-gray-100 text-gray-600">Pas de photo</Badge>
@@ -151,11 +142,8 @@ export function getUserColumns(onPreview: (url: string, isImage: boolean) => voi
             cell: ({ row }) => {
                 const document1 = row.original.document1;
                 return document1 ? (
-                    <Button
-                        variant="link"
-                        onClick={() => onPreview(document1, isImage(document1))}
-                        className="p-0 h-auto text-blue-600 hover:underline"
-                    >
+                    <Button  variant="link" onClick={() => onPreview(document1, isImage(document1))}
+                        className="p-0 h-auto text-blue-600 hover:underline" >
                         Voir la carte
                     </Button>
                 ) : (

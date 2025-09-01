@@ -112,8 +112,7 @@ export default function MobileBottomNav() {
                                     key={href}
                                     href={href}
                                     className="flex items-center justify-between px-3 py-3 rounded-md hover:bg-muted"
-                                    onClick={() => setOpen(false)}
-                                >
+                                    onClick={() => setOpen(false)} >
                                     <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
                                         {icon}
                                         {label}
@@ -130,9 +129,7 @@ export default function MobileBottomNav() {
                         <Separator className="my-4" />
 
                         {/* Déconnexion */}
-                        <Button
-                            variant="ghost"
-                            className="w-full flex justify-start text-red-600"
+                        <Button variant="ghost" className="w-full flex justify-start text-red-600"
                             onClick={() => {
                                 // TODO: ajouter ici la logique de logout si besoin
                                 setOpen(false);

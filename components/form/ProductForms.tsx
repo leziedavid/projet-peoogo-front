@@ -441,7 +441,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                             <CardContent>
                                 {initialValues?.imageUrl ? (
                                     <div className="relative w-40 h-40 aspect-square rounded-md overflow-hidden">
-                                        <Image src={initialValues.imageUrl} alt="Image principale" fill className="object-cover" loading="lazy" />
+                                        <Image src={initialValues.imageUrl} alt="Image principale" fill className="object-cover" loading="lazy" unoptimized/>
                                     </div>
                                 ) : (
                                     <p className="text-muted-foreground text-center">Aucune image principale disponible.</p>
@@ -459,7 +459,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                                     <div className="flex flex-wrap justify-center gap-4">
                                         {allImages.map((imageUrl, index) => (
                                             <div key={index} className="w-24 h-24 relative rounded-md overflow-hidden">
-                                                <Image src={imageUrl} alt={`Image ${index + 1}`} fill className="object-cover" loading="lazy" />
+                                                <Image src={imageUrl} alt={`Image ${index + 1}`} fill className="object-cover" loading="lazy" unoptimized />
                                             </div>
                                         ))}
                                     </div>

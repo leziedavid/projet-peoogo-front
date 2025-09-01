@@ -245,7 +245,7 @@ export default function ChatInterface({ onClose, isOpen, question, lastOrderId }
                                                                 src={message.imageUrl}
                                                                 alt="Pièce jointe"
                                                                 fill
-                                                                className="object-contain rounded-md"
+                                                                className="object-contain rounded-md" unoptimized
                                                             />
                                                         </div>
                                                     )}
@@ -324,7 +324,7 @@ export default function ChatInterface({ onClose, isOpen, question, lastOrderId }
                                             src={URL.createObjectURL(selectedFile)}
                                             alt="Aperçu"
                                             fill
-                                            className="object-cover rounded-md"
+                                            className="object-cover rounded-md" unoptimized
                                         />
                                         <button
                                             onClick={() => setSelectedFile(null)}

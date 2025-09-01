@@ -53,7 +53,7 @@ const FilesPreviewDialog: React.FC<FilesPreviewDialogProps> = ({ imageUrl, open,
                         <Skeleton height="100%" />
                     </div>
                 ) : (
-                    <Image  src={imageUrl} alt="Preview" className="object-contain w-full max-h-[70vh] mx-auto" onLoad={handleImageLoad}  width={500} height={300} />
+                    <Image  src={imageUrl} alt="Preview" className="object-contain w-full max-h-[70vh] mx-auto" onLoad={handleImageLoad}  width={500} height={300} unoptimized/>
                 )}
             </DialogContent>
         </Dialog>
