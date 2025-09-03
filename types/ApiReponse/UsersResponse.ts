@@ -12,6 +12,12 @@ export interface UsersData {
     data: User[];
 }
 
+export interface UserFiles {
+    photo: string | null;
+    document1: string | null;
+    document2: string | null;
+}
+
 export interface User {
     id: string;
     email: string;
@@ -33,6 +39,7 @@ export interface User {
     agentSuperviseur: any[]; // To be defined if data available
     agentControle: Enrollement[];
     photo: string | null;
+    userFiles: UserFiles | null;
     document1: string | null;
     document2: string | null;
 }

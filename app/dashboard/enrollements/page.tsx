@@ -51,7 +51,7 @@ const Page = () => {
                 break;
 
             case 'export':
-                router.push('/dashboard/export');
+                router.push('/dashboard/exports');
                 break;
 
 

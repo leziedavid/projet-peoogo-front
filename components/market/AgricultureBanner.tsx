@@ -24,10 +24,10 @@ export default function AgricultureBanner() {
                             <p className="text-sm md:text-base mt-4 max-w-md">
                                 Grâce à notre plateforme, nous connectons les consommateurs aux producteurs agricoles locaux, pour une meilleure traçabilité et des produits de qualité.
                             </p>
-                            <div className="mt-6 flex gap-4">
+                            {/* <div className="mt-6 flex gap-4">
                                 <Button className="bg-[#B07B5E] text-white hover:bg-white  hover:text-black">Plus l&apos;infos</Button>
                                 <Button  className="bg-[#B07B5E] text-white hover:bg-white   hover:text-black">Connexion</Button>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

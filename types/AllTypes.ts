@@ -27,6 +27,7 @@ export enum TypeCompte {
     RELAIS,
     SUPPERVISEUR,
     UTILISATEUR,
+    
 }
 
 export enum AllRole {

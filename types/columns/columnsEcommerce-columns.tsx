@@ -44,25 +44,25 @@ export const columns: ColumnDef<EcommerceOrder>[] = [
                 PENDING: "bg-yellow-500",
                 VALIDATED: "bg-green-600",
                 IN_PROGRESS: "bg-blue-600",
-                COMPLETED: "bg-emerald-600",
+                COMPLETED: "bg-orange-600",
                 CANCELLED: "bg-red-600",
             };
 
             const label = orderStatusToFrench[status] ?? status;
-
+            console.log(colorMap[status]);
             return (
-                <Badge className={`${colorMap[status] || "bg-gray-400"} text-white`}>
+                <Badge className={`${colorMap[status] || "bg-gray-400"} text-white`} >
                     {label}
                 </Badge>
             );
         },
-    },
+    }
+    ,
     {
         accessorKey: "paymentMethod",
         header: "PAIEMENT",
         cell: ({ row }) => (
-            <Badge variant="outline">
-                {paymentMethodToFrench[row.original.paymentMethod] ??
+            <Badge variant="outline" className="bg-gray-100 text-black"> {paymentMethodToFrench[row.original.paymentMethod] ??
                     row.original.paymentMethod}
             </Badge>
         ),
@@ -71,10 +71,7 @@ export const columns: ColumnDef<EcommerceOrder>[] = [
         accessorKey: "deliveryMethod",
         header: "LIVRAISON",
         cell: ({ row }) => (
-            <span>
-                {deliveryMethodToFrench[row.original.deliveryMethod] ??
-                    row.original.deliveryMethod}
-            </span>
+            <span> {deliveryMethodToFrench[row.original.deliveryMethod] ?? row.original.deliveryMethod} </span>
         ),
     },
     {

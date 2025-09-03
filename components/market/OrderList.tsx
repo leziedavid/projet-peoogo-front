@@ -82,11 +82,7 @@ export default function OrderList() {
 
     return (
 
-
         <div className="p-4 space-y-4">
-
-            {/* <pre>{JSON.stringify(ecommerceOrder, null, 2)}</pre> */}
-
             {loading ? Array.from({ length: 5 }).map((_, i) => <OrderCardSkeleton key={i} />) : ecommerceOrder.map((order) => (
                     <div key={order.id} className="rounded-lg bg-gray-50">
                         <div
@@ -129,7 +125,6 @@ export default function OrderList() {
                     </div>
                     </div>
                 ))}
-
             <OrderDetails isOpen={isOpen} onClose={() => setIsOpen(false)} order={data} />
         </div>
 

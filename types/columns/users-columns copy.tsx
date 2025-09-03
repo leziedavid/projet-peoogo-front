@@ -12,27 +12,29 @@ import { User } from "../ApiReponse/UsersResponse";
 import { useState } from "react";
 import { validateCompte } from "@/api/services/auth";
 
+
 // Fonction pour détecter les images
-function isImage(url: string | undefined | null): boolean {
-    if (!url) return false;
-    const imageExtensions = ["jpg", "jpeg", "png", "webp", "gif"];
-    const extension = url.split(".").pop()?.toLowerCase();
-    return !!extension && imageExtensions.includes(extension);
+function isImage(url: string): boolean {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    try {
+        const extension = url.split('.').pop()?.toLowerCase();
+        return !!extension && imageExtensions.includes(extension);
+    } catch {
+        return false;
+    }
 }
 
 // Cette fonction reçoit la callback onPreview depuis le parent
-export function getUserColumns(
-    onPreview: (url: string, isImage: boolean) => void
-): ColumnDef<User>[] {
+export function getUserColumns(onPreview: (url: string, isImage: boolean) => void): ColumnDef<User>[] {
     return [
         {
             accessorKey: "photo",
             header: "PHOTO",
             cell: ({ row }) => {
-                const image = row.original.userFiles?.photo || row.original.photo;
+                const image = row.original.photo;
                 return image ? (
-                    <div className="relative w-10 h-10 rounded-full  cursor-pointer" onClick={() => onPreview(image, true)} >
-                        <Image src={image} alt="Photo utilisateur" className="object-cover w-10 h-10 rounded-full"  width={30} height={30} unoptimized />
+                    <div className="w-15 h-15 relative rounded-full overflow-hidden cursor-pointer" onClick={() => onPreview(image, true)} >
+                        <Image src={image} alt="Photo utilisateur" fill sizes="49px" className="object-cover rounded-full" unoptimized />
                     </div>
                 ) : (
                     <Badge className="bg-gray-100 text-gray-600">Pas de photo</Badge>
@@ -42,12 +44,7 @@ export function getUserColumns(
         {
             accessorKey: "fullName",
             header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === "asc")
-                    }
-                >
+                <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
                     NOM COMPLET <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -63,22 +60,19 @@ export function getUserColumns(
             header: "TÉLÉPHONE",
             cell: ({ row }) => <div>{row.original.phoneNumber}</div>,
         },
+        // code
         {
             accessorKey: "code",
             header: "CODE",
             cell: ({ row }) => <div>{row.original.codeGenerate}</div>,
-        },
+        }
+        ,
         {
             accessorKey: "status",
             header: "STATUT",
             cell: ({ row }) => {
                 const status = row.original.status;
-                const statusColor =
-                    status === "ACTIVE"
-                        ? "bg-green-100 text-green-700"
-                        : status === "INACTIVE"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-gray-100 text-gray-700";
+                const statusColor = status === "ACTIVE" ? "bg-green-100 text-green-700" : status === "INACTIVE" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-700";
                 return <Badge className={statusColor}>{status}</Badge>;
             },
         },
@@ -91,17 +85,20 @@ export function getUserColumns(
 
                 const [checked, setChecked] = useState(currentStatus === "ACTIVE");
                 const [loading, setLoading] = useState(false);
+
                 const isBlocked = currentStatus === "BLOCKED";
 
                 const handleToggle = async (value: boolean) => {
                     setLoading(true);
                     try {
+                        // Mapping du nouveau statut
                         const newStatus = value ? "ACTIVE" : "INACTIVE";
+
+                        // ✅ Appel API pour valider le compte
                         await validateCompte(id, newStatus);
+
                         setChecked(value);
-                        toast.success(
-                            `Utilisateur ${row.original.name} ${value ? "activé" : "désactivé"}.`
-                        );
+                        toast.success(`Utilisateur ${row.original.name} ${value ? "activé" : "désactivé"}.`);
                     } catch (error) {
                         setChecked(!value);
                         toast.error("Erreur lors de la mise à jour du statut.");
@@ -125,6 +122,7 @@ export function getUserColumns(
                 );
             },
         },
+
         {
             accessorKey: "walletBalance",
             header: "SOLDE",
@@ -137,13 +135,10 @@ export function getUserColumns(
             accessorKey: "document1",
             header: "CNI RECTO",
             cell: ({ row }) => {
-                const document1 = row.original.userFiles?.document1;
+                const document1 = row.original.document1;
                 return document1 ? (
-                    <Button
-                        variant="link"
-                        onClick={() => onPreview(document1, isImage(document1))}
-                        className="p-0 h-auto text-blue-600 hover:underline"
-                    >
+                    <Button  variant="link" onClick={() => onPreview(document1, isImage(document1))}
+                        className="p-0 h-auto text-blue-600 hover:underline" >
                         Voir la carte
                     </Button>
                 ) : (
@@ -153,9 +148,9 @@ export function getUserColumns(
         },
         {
             accessorKey: "document2",
-            header: "CNI VERSO",
+            header: "CNI VERSO  ",
             cell: ({ row }) => {
-                const document2 = row.original.userFiles?.document2;
+                const document2 = row.original.document2;
                 return document2 ? (
                     <Button
                         variant="link"
