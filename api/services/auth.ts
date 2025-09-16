@@ -135,7 +135,6 @@ export const getUserAllData = async (): Promise<BaseResponse<UserData>> => {
                 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`
             },
         })
-
         return await response.json()
     } catch (error) {
         toast.error("Erreur réseau ou serveur.");

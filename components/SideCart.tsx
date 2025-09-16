@@ -16,7 +16,7 @@ interface Props {
 const SideCart: React.FC<Props> = ({ visible, onRequestClose }) => {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  
   const getIsAuthenticated = async () => {
 
     const res = await getUserAllData()

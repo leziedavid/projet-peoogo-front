@@ -123,7 +123,7 @@ const Forms: React.FC<Props> = () => {
                             <div className="bg-gray-50 md:w-4/5 space-y-6 p-4 rounded-lg">
                                 <div className="flex gap-4 border-b pb-4">
                                     <MapPin className="mt-0 text-[#B07B5E]" />
-                                    <div className="font-medium">FASSO 2000 / FASSO 2000</div>
+                                    <div className="font-medium">FASO 2000 / FASO 2000</div>
                                 </div>
                                 <div className="flex gap-4 border-b pb-4">
                                     <Phone className="mt-0 text-[#B07B5E]" />

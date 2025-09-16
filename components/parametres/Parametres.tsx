@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import {Edit3,User,Phone,Mail,MapPin,Camera,Eye,EyeOff,Save,X,CreditCard,Wallet,Calendar,Shield} from "lucide-react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Switch } from "@/components/ui/switch"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,7 +12,6 @@ import { useIsMobile } from "@/hooks/useIsMobile"
 import { UserData } from "@/types/ApiReponse/UserDataResponse"
 import { getUserAllData, updateFiles, updateProfile } from "@/api/services/auth"
 import { toast } from 'sonner'
-import { isSessionStillValid } from "@/app/middleware"
 
 interface ParametresProps {
     onClose: () => void

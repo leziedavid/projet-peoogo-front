@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import {PanelLeftOpen, PanelLeftClose, Home, MapPinned,ShoppingCart, Users2, Store, LogOut,Settings, Wallet, Users, Workflow, HandCoins, PiggyBank, Bell, Mail } from 'lucide-react';
+import {PanelLeftOpen, PanelLeftClose, Home, MapPinned,ShoppingCart, Users2, Store, LogOut,Settings, Wallet, Users, Workflow, HandCoins, PiggyBank, Bell, Mail, Cog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '../ui/badge';
@@ -21,7 +21,6 @@ export default function MobileBottomNav() {
     const [openParametres, setOpenParametres] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-
     const navItems = [
         { href: '/dashboard/compte', label: 'Dashboard', icon: <Home className="h-5 w-5" /> },
         { href: '/dashboard/notification', label: 'Notifications', icon: <Bell className="h-5 w-5" /> },
@@ -31,6 +30,7 @@ export default function MobileBottomNav() {
         { href: '/dashboard/liste-users', label: 'Liste des utilisateurs', icon: <Users2 className="h-5 w-5" /> },
         { href: '/dashboard/transaction', label: 'Transactions', icon: <HandCoins className="h-5 w-5" /> },
         { href: '/dashboard/reversement', label: 'Reversements', icon: <PiggyBank className="h-5 w-5" /> },
+        { href: '/dashboard/configurations', label: 'configurations', icon: <Cog className="h-5 w-5" /> },
         { href: '/dashboard/decoupage', label: 'Decoupage', icon: <MapPinned className="h-5 w-5" /> },
         { href: '/dashboard/activite-speculation', label: 'Activites & Spéculations', icon: <Workflow className="h-5 w-5" /> },
         { href: '/dashboard/prix-du-marche', label: 'Prix du marché', icon: <HandCoins className="h-5 w-5" /> },

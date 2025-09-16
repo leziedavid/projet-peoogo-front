@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Award, Bell, HandCoins, Home, Mail, MapPinned, PanelLeft, PiggyBank,ShoppingCart, Store, Users, Users2, Workflow } from 'lucide-react';
+import { Award, Bell, Cog, HandCoins, Home, Mail, PanelLeft, PiggyBank,ShoppingCart, Store, Users, Users2, Workflow } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NavItem } from '../dash/nav-item';
 import { useEffect } from 'react';
@@ -16,7 +16,7 @@ const navItems = [
     { href: '/dashboard/liste-users', label: 'Liste des utilisateurs', icon: <Users2 className="h-5 w-5" /> },
     { href: '/dashboard/transaction', label: 'Transactions', icon: <HandCoins className="h-5 w-5" /> },
     { href: '/dashboard/reversement', label: 'Reversements', icon: <PiggyBank className="h-5 w-5" /> },
-    { href: '/dashboard/decoupage', label: 'Decoupage', icon: <MapPinned className="h-5 w-5" /> },
+    { href: '/dashboard/configurations', label: 'configurations', icon: <Cog className="h-5 w-5" /> },
     { href: '/dashboard/activite-speculation', label: 'Activites & Spéculations', icon: <Workflow className="h-5 w-5" /> },
     { href: '/dashboard/prix-du-marche', label: 'Prix du marché', icon: <Award className="h-5 w-5" /> },
     { href: '/dashboard/contact', label: 'Contacts', icon: <Mail className="h-5 w-5" /> },

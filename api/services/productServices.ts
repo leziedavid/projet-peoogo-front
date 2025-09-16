@@ -8,7 +8,6 @@ import { UserEnrollementData } from '@/types/ApiReponse/userEnrollementData'
 import { BaseResponse } from '@/types/BaseResponse'
 import { getBaseUrl } from '@/types/baseUrl'
 import { Pagination } from '@/types/pagination'
-import { tr } from 'date-fns/locale'
 import { secureFetch } from './auth'
 
 // getUserEnrollementDataByCode

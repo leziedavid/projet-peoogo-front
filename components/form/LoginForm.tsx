@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { loginByPhoneCode } from '@/api/services/auth';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { AllRole, Role } from '@/types/AllTypes';
+import { Role } from '@/types/AllTypes';
 
 const loginSchema = z.object({
     login: z.string().min(1, "Le login est requis"),

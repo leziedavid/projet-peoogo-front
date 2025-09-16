@@ -89,11 +89,9 @@ const HeaderMarket: React.FC = ({ }) => {
         const res = await getUserAllData()
 
         if (res.statusCode === 200 && res.data) {
-
             setIsLoggedIn(true)
             setUserName(res.data.name);
             setImageUrl(res.data.imageUrl);
-
         } else {
             setIsLoggedIn(false);
         }
@@ -201,9 +199,7 @@ const HeaderMarket: React.FC = ({ }) => {
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-2">
-                                    <User
-                                        onClick={() => router.push("/auth/login")}
-                                        className="w-6 h-6 text-[#B07B5E] cursor-pointer"
+                                    <User onClick={() => router.push("/auth/login")}  className="w-6 h-6 text-[#B07B5E] cursor-pointer"
                                     />
                                 </div>
                             )}
