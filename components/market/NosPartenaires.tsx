@@ -78,7 +78,7 @@ const NosPartenaires: React.FC<NosPartenairesProps> = ({ titre = 'NOS PARTENAIRE
                                         <div className="bg-white rounded-lg hover:shadow-lg transition-all duration-300 p-6 h-32 flex items-center justify-center border border-gray-200 hover:border-[#B07B5E]">
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {partenaire.logo && (
-                                                    <Image  src={partenaire.logo}  alt={partenaire.libeller || 'logo'} fill style={{ objectFit: 'contain' }} className="object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                    <Image  src={partenaire.logo}  alt={partenaire.libeller || 'logo'} fill style={{ objectFit: 'contain' }} className="object-contain group-hover:scale-105 transition-transform duration-300" unoptimized />
                                                 )}
                                             </div>
                                         </div>

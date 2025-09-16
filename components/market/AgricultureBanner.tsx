@@ -42,9 +42,9 @@ export default function AgricultureBanner() {
                             {loading ? (
                                 <div className="w-full h-full bg-gray-200 animate-pulse rounded-lg" />
                             ) : publicites.length > 0 ? (
-                                <Image src={publicites[0].files ?? '/cereales.jpg'} alt='Publicité' fill style={{ objectFit: 'cover' }} className="object-cover rounded-lg" />
+                                <Image src={publicites[0].files ?? '/cereales.jpg'} alt='Publicité' fill style={{ objectFit: 'cover' }} className="object-cover rounded-lg" unoptimized />
                             ) : (
-                                <Image src="/cereales.jpg" alt="Default" fill  style={{ objectFit: 'cover' }} className="object-cover rounded-lg"/>
+                                <Image src="/cereales.jpg" alt="Default" fill  style={{ objectFit: 'cover' }} className="object-cover rounded-lg" unoptimized/>
                             )}
                         </div>
 

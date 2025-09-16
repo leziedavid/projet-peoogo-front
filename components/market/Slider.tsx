@@ -57,10 +57,7 @@ export default function Slider() {
 
     // 🟢 Composant Slide qui garde ton rendu EXACT
     const SlideContent = ({ slide }: { slide: SliderData }) => (
-        <div
-            className="relative flex flex-col text-center bg-cover bg-center rounded-md p-4 lg:p-14 gap-8 items-center"
-            style={{ backgroundImage: `url(${slide.imageUrl})` }}
-        >
+        <div className="relative flex flex-col text-center bg-cover bg-center rounded-md p-4 lg:p-14 gap-8 items-center" style={{ backgroundImage: `url(${slide.imageUrl})` }} >
             {/* Overlay noir */}
             <div className="absolute inset-0 bg-black opacity-30 rounded-md"></div>
 
