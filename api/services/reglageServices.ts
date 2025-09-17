@@ -4,7 +4,7 @@ import { getBaseUrl } from '@/types/baseUrl';
 import { secureFetch } from './auth';
 import { SliderFormValues, PubliciteFormValues, ReglageFormValues } from '@/types/ApiRequest/Allinterfaces';
 import { Pagination } from '@/types/pagination';
-import { Partenaire, Publicite, Reglage, Slider } from '@/types/ApiReponse/adminApi';
+import { Partenaire, PaymentMethode, Publicite, Reglage, Slider } from '@/types/ApiReponse/adminApi';
 
 /* -------------------- SLIDER -------------------- */
 export const createSlider = async (formData: FormData): Promise<BaseResponse<Slider>> => {
@@ -63,8 +63,9 @@ export const getAllSliders = async (page: number = 1, limit: number = 10): Promi
     try {
         const response = await fetch(`${getBaseUrl()}/slider?page=${page}&limit=${limit}`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
         });
         return await response.json();
@@ -131,8 +132,9 @@ export const getAllPublicites = async (page: number = 1, limit: number = 10): Pr
     try {
         const response = await fetch(`${getBaseUrl()}/publicite?page=${page}&limit=${limit}`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
         });
         return await response.json();
@@ -146,8 +148,9 @@ export const getAllPublicitesHome = async (): Promise<BaseResponse<Publicite[]>>
     try {
         const response = await fetch(`${getBaseUrl()}/publicite/home`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
         });
         return await response.json();
@@ -214,10 +217,11 @@ export const getAllReglages = async (page: number = 1, limit: number = 10): Prom
     try {
         const response = await fetch(`${getBaseUrl()}/reglage?page=${page}&limit=${limit}`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-            
+
         });
         return await response.json();
     } catch (error) {
@@ -231,10 +235,11 @@ export const getAllReglagesHome = async (): Promise<BaseResponse<Reglage[]>> => 
     try {
         const response = await fetch(`${getBaseUrl()}/reglage/home`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
-            
+
         });
         return await response.json();
     } catch (error) {
@@ -242,7 +247,6 @@ export const getAllReglagesHome = async (): Promise<BaseResponse<Reglage[]>> => 
         throw error;
     }
 };
-
 
 /* -------------------- PARTENAIRE -------------------- */
 
@@ -289,7 +293,7 @@ export const getAllPartenairesHomes = async (): Promise<BaseResponse<Partenaire[
     try {
         const response = await fetch(`${getBaseUrl()}/partenaire/home`, {
             method: 'GET',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -305,7 +309,7 @@ export const getAllPartenaires = async (page: number = 1, limit: number = 10): P
     try {
         const response = await fetch(`${getBaseUrl()}/partenaire`, {
             method: 'GET',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -313,6 +317,96 @@ export const getAllPartenaires = async (page: number = 1, limit: number = 10): P
         return await response.json();
     } catch (error) {
         console.error('Erreur lors de la récupération des partenaires :', error);
+        throw error;
+    }
+};
+
+
+/* -------------------- PAYMENT METHODES -------------------- */
+
+export const createPaymentMethode = async (formData: FormData): Promise<BaseResponse<PaymentMethode>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/payment-methode`, {
+            method: 'POST',
+            body: formData,
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Erreur lors de la création de la méthode de paiement :", error);
+        throw error;
+    }
+};
+
+export const updatePaymentMethode = async (id: string, formData: FormData): Promise<BaseResponse<PaymentMethode>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/payment-methode/${id}`, {
+            method: 'PATCH',
+            body: formData,
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de la méthode de paiement :", error);
+        throw error;
+    }
+};
+
+export const deletePaymentMethode = async (id: string): Promise<BaseResponse<any>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/payment-methode/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Erreur lors de la suppression de la méthode de paiement :", error);
+        throw error;
+    }
+};
+
+export const getPaymentMethodeById = async (id: string): Promise<BaseResponse<PaymentMethode>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/payment-methode/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Erreur lors de la récupération de la méthode de paiement :", error);
+        throw error;
+    }
+};
+
+export const getAllPaymentMethodes = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<PaymentMethode>>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/payment-methode?page=${page}&limit=${limit}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Erreur lors de la récupération des méthodes de paiement :", error);
+        throw error;
+    }
+};
+
+export const getAllPaymentMethodesHome = async (): Promise<BaseResponse<PaymentMethode[]>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/payment-methode/home`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Erreur lors de la récupération des méthodes de paiement (home) :", error);
         throw error;
     }
 };

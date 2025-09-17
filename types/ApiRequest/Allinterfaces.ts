@@ -44,3 +44,12 @@ export const partenaireSchema = z.object({
 });
 
 export type PartenaireFormValues = z.infer<typeof partenaireSchema>;
+
+// PaymentMethodes
+export const paymentMethodesSchema = z.object({
+    name: z.string().min(2, "Nom obligatoire"),
+    logo: z.any().optional(),
+    status: z.enum(["ACTIVE", "INACTIVE"]).optional(), // Backend gère par défaut ACTIVE
+});
+
+export type PaymentMethodesFormValues = z.infer<typeof paymentMethodesSchema>;

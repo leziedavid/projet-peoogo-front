@@ -1,6 +1,6 @@
 "use client";
 
-import Image from 'next/image'
+import Image from 'next/image';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,9 +20,11 @@ import { toast } from "sonner";
 import HeaderMarket from "@/components/market/HeaderMarket";
 import { Footer } from '@/components/home/Footer';
 import { launchPayment, requestToGetTransactionStatus } from '@/api/services/paymentService';
-
+import { getAllPaymentMethodesHome } from '@/api/services/reglageServices';
+import { Status } from '@/types/ApiReponse/adminApi';
 
 type OrderCheckoutInput = z.infer<typeof orderCheckoutSchema>;
+
 interface PaymentMethodChoice {
     id: PaymentMethod;
     label: string;
@@ -36,6 +38,15 @@ interface DeliveryMethodChoice {
     label: string;
     subLabel: string;
     price: number;
+}
+
+type Network = 'MOOV' | 'ORANGE' | 'MTN' | 'WAVE';
+
+interface NetworkItem {
+    id: Network;
+    label: string;
+    logo: string;
+    status: Status; // <-- maintenant on utilise Status directement
 }
 
 const paymentMethods: PaymentMethodChoice[] = [
@@ -57,7 +68,6 @@ const paymentMethods: PaymentMethodChoice[] = [
         description: "Payez avec votre carte de crédit",
         enabled: false,
     },
-    // Ajoute d'autres méthodes si nécessaire
 ];
 
 const deliveryMethods: DeliveryMethodChoice[] = [
@@ -75,33 +85,20 @@ const deliveryMethods: DeliveryMethodChoice[] = [
     },
 ];
 
-type Network = 'MOOV' | 'ORANGE' | 'MTN' | 'WAVE'
-type NetworkStatus = 'available' | 'unavailable'
-
-
 export default function Page() {
-
     const router = useRouter();
     const { items: cartItems, clearCart, countTotalPrice } = useCart();
-    const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null)
-    const [amount, setAmount] = useState('')
-    const [paimentNember, setPaimentNember] = useState('')
+    const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
+    const [paimentNember, setPaimentNember] = useState('');
     const [showNetwork, setShowNetwork] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState(false);
-
-    const [error, setError] = useState<string | null>(null)
-
-    const networks: { id: Network; label: string; logo: string; status: NetworkStatus }[] = [
-        { id: 'WAVE', label: 'WAVE', logo: '/wave.png', status: 'available' },
-        { id: 'ORANGE', label: 'ORANGE', logo: '/orange.png', status: 'available' },
-        { id: 'MOOV', label: 'MOOV', logo: '/moov.png', status: 'unavailable' },
-        { id: 'MTN', label: 'MTN', logo: '/mtn.jpeg', status: 'unavailable' },
-    ]
+    const [error, setError] = useState<string | null>(null);
+    const [networks, setNetworks] = useState<NetworkItem[]>([]); // <-- utilise Status
 
     const form = useForm<OrderCheckoutInput>({
         resolver: zodResolver(orderCheckoutSchema),
         defaultValues: {
-            deliveryDetails: { name: "", email: "", phone: "", company: "", },
+            deliveryDetails: { name: "", email: "", phone: "", company: "" },
             paymentMethod: PaymentMethod.ON_ARRIVAL,
             deliveryMethod: DeliveryMethod.HOME_DELIVERY,
             promoCode: "",
@@ -110,7 +107,30 @@ export default function Page() {
         },
     });
 
-    // Charge les infos utilisateur dans le formulaire au chargement
+    // Récupération des réseaux actifs
+    useEffect(() => {
+        async function fetchActivePaymentMethods() {
+            try {
+                const res = await getAllPaymentMethodesHome();
+                if (res.statusCode === 200 && res.data) {
+                    const activeNetworks: NetworkItem[] = res.data
+                        .filter((methode: any) => methode.status === 'ACTIVE')
+                        .map((methode: any) => ({
+                            id: methode.name.toUpperCase() as Network,
+                            label: methode.name,
+                            logo: methode.logo ?? `/default-logo.png`,
+                            status: methode.status as Status,
+                        }));
+                    setNetworks(activeNetworks);
+                }
+            } catch (err) {
+                console.error("Erreur lors du chargement des méthodes de paiement :", err);
+            }
+        }
+        fetchActivePaymentMethods();
+    }, []);
+
+    // Charge infos utilisateur
     useEffect(() => {
         async function fetchUser() {
             try {
@@ -125,7 +145,6 @@ export default function Page() {
                             company: "",
                         },
                     });
-                    // Définit le numéro par défaut pour le paiement mobile
                     setPaimentNember(res.data.phoneNumber ?? "");
                 }
             } catch (e) {
@@ -135,7 +154,7 @@ export default function Page() {
         fetchUser();
     }, [form]);
 
-    // Met à jour items et amount à chaque changement dans le panier
+    // Mise à jour du panier
     useEffect(() => {
         form.setValue(
             "items",
@@ -145,114 +164,85 @@ export default function Page() {
                 price: item.product.prixUnitaire,
             }))
         );
-
         form.setValue("amount", Number(countTotalPrice()));
     }, [cartItems, countTotalPrice, form]);
 
-    // Handlers pour mettre à jour paymentMethod, deliveryMethod, promoCode dans le formulaire
     function handlePaymentChange(val: string) {
-
         form.setValue("paymentMethod", val as PaymentMethod, { shouldValidate: true });
-        if (val === 'MOBILE_MONEY') {
-            setShowNetwork(true)
-        } else {
-            setShowNetwork(false)
-        }
+        setShowNetwork(val === PaymentMethod.MOBILE_MONEY);
     }
+
     function handleDeliveryChange(val: string) {
         form.setValue("deliveryMethod", val as DeliveryMethod, { shouldValidate: true });
     }
+
     function handlePromoChange(val: string) {
         form.setValue("promoCode", val, { shouldValidate: true });
     }
 
     const handleSelectNetwork = (id: Network) => {
         if (selectedNetwork === id) {
-            setSelectedNetwork(null)
-            setAmount('')
-            setError(null)
+            setSelectedNetwork(null);
+            setError(null);
         } else {
-            setSelectedNetwork(id)
-            setError(null)
+            setSelectedNetwork(id);
+            setError(null);
         }
-    }
+    };
+
     const getTransactionStatus = async (id: string) => {
         const response = await requestToGetTransactionStatus(id);
         if (response.statusCode === 200) {
             setPaymentStatus(response.data);
-            // 🚀 Auto-soumission du formulaire si paiement validé
             form.handleSubmit(onSubmit)();
         }
-    }
+    };
 
     const handleNetworkPayment = async () => {
-
         if (!selectedNetwork || !paimentNember) {
             toast.error("Veuillez sélectionner un réseau et entrer un numéro.");
             return;
         }
 
-        const payload = {
-            phone: paimentNember,
-            amount: countTotalPrice(),
-        };
+        const payload = { phone: paimentNember, amount: countTotalPrice() };
 
         try {
-
-            let response;
-
             switch (selectedNetwork) {
                 case "WAVE":
-                    try {
-                        const paymentstatus = await launchPayment(payload);
-                        console.log(paymentstatus);
-
-                        if (paymentstatus.statusCode === 200) {
-                            toast.success("Paiement effectué avec succès.");
-                            getTransactionStatus(paymentstatus.data.id);
-                        }
-
-                    } catch (error) {
-                        toast.error("Échec lors de la vérification du paiement.");
+                    const wavePayment = await launchPayment(payload);
+                    if (wavePayment.statusCode === 200) {
+                        toast.success("Paiement effectué avec succès.");
+                        getTransactionStatus(wavePayment.data.id);
                     }
                     break;
                 case 'ORANGE':
-                    response = await fetch('/api/payment/orange', {
+                    await fetch('/api/payment/orange', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload),
                     });
                     break;
                 case 'MOOV':
-                    toast.error("Moov n'est pas encore disponible.");
-                    return;
                 case 'MTN':
-                    toast.error("MTN n'est pas encore disponible.");
+                    toast.error(`${selectedNetwork} n'est pas encore disponible.`);
                     return;
                 default:
                     toast.error("Réseau non reconnu.");
                     return;
             }
-
         } catch (error) {
             toast.error(`Erreur : ${error}`);
         }
-
     };
 
-    // Soumission du formulaire
     async function onSubmit(data: OrderCheckoutInput) {
-
         try {
-            // mais on peut le garder par sécurité.
             const payload = {
                 ...data,
-                paymentMethod: data.paymentMethod,
-                deliveryMethod: data.deliveryMethod,
-                promoCode: data.promoCode ?? undefined, // Ensure promoCode is never null
-                paiementNumber: paimentNember ?? undefined, // Ensure paiementNumber is never null
+                paiementNumber: paimentNember ?? undefined,
                 network: selectedNetwork ?? undefined,
-                paymentStatus: paymentStatus,
+                paymentStatus,
+                promoCode: data.promoCode ?? undefined, // <-- Convertit null en undefined
             };
 
             const res = await submitOrder(payload);
@@ -263,13 +253,11 @@ export default function Page() {
             } else {
                 toast.error("Une erreur est survenue lors de la commande.");
             }
-
-
         } catch (e) {
-            // alert("Une erreur est survenue lors de la commande.");
+            console.error(e);
         }
-
     }
+
 
     return (
         <>
@@ -304,7 +292,29 @@ export default function Page() {
                                     ))}
                                 </RadioGroup>
 
+
+                                {/* Paiement */}
                                 {showNetwork && (
+                                    <div className="flex gap-4 flex-wrap items-center mt-4 mb-4">
+                                        {networks.map(({ id, label, logo, status }) => (
+                                            <button
+                                                key={id}
+                                                type="button"
+                                                onClick={() => status === 'ACTIVE' && handleSelectNetwork(id)}
+                                                disabled={status !== 'ACTIVE'}
+                                                className={`relative flex flex-col items-center rounded-full border-2 p-2 transition 
+                                            ${selectedNetwork === id && status === 'ACTIVE' ? 'border-green-500 shadow-md' : 'border-transparent'}  
+                                            ${status !== 'ACTIVE' ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300'}`}
+                                                style={{ width: 70, height: 70 }}
+                                            >
+                                                <Image src={logo} alt={label} width={48} height={48} className="rounded-full object-cover" unoptimized />
+                                                <span className="mt-2 text-xs font-medium text-gray-700">{label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* {showNetwork && (
                                     <div className="flex gap-4 items-center mt-4 mb-4">
                                         {networks.map(({ id, label, logo, status }) => (
                                             <button key={id} type="button" onClick={() => status === 'available' && handleSelectNetwork(id)} disabled={status === 'unavailable'} className={`relative flex flex-col items-center rounded-full border-2 p-2 transition ${selectedNetwork === id && status === 'available' ? 'border-green-500 shadow-md' : 'border-transparent'}  ${status === 'unavailable' ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300'}`} style={{ width: 70, height: 70 }}>
@@ -313,7 +323,7 @@ export default function Page() {
                                             </button>
                                         ))}
                                     </div>
-                                )}
+                                )} */}
 
                                 {selectedNetwork && showNetwork && (
                                     <div className="mb-4 space-y-4 mt-10">

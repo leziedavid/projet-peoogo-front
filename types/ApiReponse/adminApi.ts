@@ -54,3 +54,12 @@ export interface Partenaire {
     createdAt: string; // ISO string
     updatedAt: string; // ISO string
 }
+
+export interface PaymentMethode {
+    id: string;
+    name: string;
+    logo?: string; // URL du logo
+    status: Status;
+    createdAt: string; // ISO string
+    updatedAt: string; // ISO string
+}
