@@ -297,16 +297,8 @@ export default function Page() {
                                 {showNetwork && (
                                     <div className="flex gap-4 flex-wrap items-center mt-4 mb-4">
                                         {networks.map(({ id, label, logo, status }) => (
-                                            <button
-                                                key={id}
-                                                type="button"
-                                                onClick={() => status === 'ACTIVE' && handleSelectNetwork(id)}
-                                                disabled={status !== 'ACTIVE'}
-                                                className={`relative flex flex-col items-center rounded-full border-2 p-2 transition 
-                                            ${selectedNetwork === id && status === 'ACTIVE' ? 'border-green-500 shadow-md' : 'border-transparent'}  
-                                            ${status !== 'ACTIVE' ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300'}`}
-                                                style={{ width: 70, height: 70 }}
-                                            >
+                                            <button key={id} type="button" onClick={() => status === 'ACTIVE' && handleSelectNetwork(id)}  disabled={status !== 'ACTIVE'}  className={`relative flex flex-col items-center rounded-full border-2 p-2 transition  ${selectedNetwork === id && status === 'ACTIVE' ? 'border-green-500 shadow-md' : 'border-transparent'}
+                                            ${status !== 'ACTIVE' ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300'}`} style={{ width: 70, height: 70 }} >
                                                 <Image src={logo} alt={label} width={48} height={48} className="rounded-full object-cover" unoptimized />
                                                 <span className="mt-2 text-xs font-medium text-gray-700">{label}</span>
                                             </button>
