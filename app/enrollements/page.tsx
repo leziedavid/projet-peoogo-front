@@ -13,7 +13,7 @@ import RelaisForm from '@/components/form/RelaisForm';
 import { useRouter } from 'next/navigation';
 const Page = () => {
 
-    const [activeTab, setActiveTab] = useState('ENROLEMENT REJETER');
+    const [activeTab, setActiveTab] = useState('FORMULAIRE');
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [UserName, setUserName] = useState("");

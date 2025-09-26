@@ -429,11 +429,11 @@ export default function ControleQualite() {
                             <div className="flex-1 bg-gray-100 rounded-lg border-1 border-orange-300 overflow-hidden">
                                 {currentRecord.photo ? (
                                     <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full " />
+                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full " unoptimized />
                                     </div>
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full " />
+                                        <Image src={photoUrl} alt="Photo du candidat" width={180} height={180} className="object-contain w-full h-full " unoptimized />
                                     </div>
                                 )}
                             </div>
@@ -459,6 +459,7 @@ export default function ControleQualite() {
                                                                 width={300}
                                                                 height={300}
                                                                 className="object-cover w-full h-full"
+                                                                unoptimized
                                                             />
                                                         </div>
                                                         <div className="text-center mt-2 text-sm text-gray-600">

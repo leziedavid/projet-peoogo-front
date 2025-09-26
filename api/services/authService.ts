@@ -14,6 +14,7 @@ import { Message } from '@/types/ApiReponse/MessagesResponse'
 import { DashboardStatsResponse } from '@/types/ApiReponse/dashboardStatsResponse'
 import { UserListDto } from '@/types/ApiReponse/userListResponse'
 import { secureFetch } from './auth'
+import { EnrollementStatByDate, GeoCoord } from '@/types/ApiReponse/StatistiquesEnrollementResponse'
 
 
 // ✅ Récupérer tous les utilisateurs
@@ -33,6 +34,63 @@ export const getAllUser = async (page: number = 1, limit: number = 10): Promise<
     }
 };
 
+
+// filterUsers
+
+export const filterUsersTableau = async (filters: FilterRequest, page: number, limit: number): Promise<BaseResponse<Pagination<User>>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/auth/users/filters?page=${page}&limit=${limit}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(filters),
+        });
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Erreur lors du filtrage des enrôlements :', error);
+        throw error;
+    }
+};
+
+export const filterUsersmodeCarte = async (filters: FilterRequest, page: number, limit: number): Promise<BaseResponse<GeoCoord[]>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/auth/users/filters?page=${page}&limit=${limit}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+            },
+            body: JSON.stringify(filters),
+        });
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Erreur lors du filtrage des enrôlements :', error);
+        throw error;
+    }
+};
+
+export const filterUsersmodeGraphique = async (filters: FilterRequest, page: number, limit: number): Promise<BaseResponse<EnrollementStatByDate[]>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/auth/users/filters?page=${page}&limit=${limit}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(filters),
+        });
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Erreur lors du filtrage des enrôlements :', error);
+        throw error;
+    }
+};
 
 export const getOrdersAndRevenueStats = async (startDate?: string, endDate?: string): Promise<BaseResponse<StatistiquesCommandesResponse>> => {
     try {

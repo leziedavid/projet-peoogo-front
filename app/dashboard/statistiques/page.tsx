@@ -6,19 +6,14 @@ import { EnrollementData } from '@/types/ApiReponse/enrollementControleResponse'
 import Image from 'next/image';
 import { columns as enrollementColumns } from '@/types/columns/enrollement-columns';
 import { DataTableSkeleton } from '@/components/table/data-table-skeleton';
-
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, } from "@/components/ui/carousel"
 import { DataTable } from '@/components/table/dataTable';
-import { Card, CardHeader } from '@/components/ui/card';
 import SearchFilter from '@/components/filter/GlobalFilter';
 import DetailEnrollement from '@/components/filter/DetailEnrollement';
-import { fa } from 'zod/v4/locales';
 import { EnrollementStatByDate, GeoCoord } from '@/types/ApiReponse/StatistiquesEnrollementResponse';
 import EnrollementGraph from '@/components/chart/EnrollementGraph';
 import EnrollementMap from '@/components/chart/EnrollementMap.client';
 import { toast } from "sonner";
 import DeleteDialog from '@/components/Dialog/DeleteDialog';
-
 
 const DEFAULT_IMAGE_URL = '/IMG_5195.png';
 
@@ -26,7 +21,7 @@ export default function Page() {
     const [listes, setListes] = useState<EnrollementData[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [limit] = useState(5);
+    const [limit] = useState(10);
     const [loading, setLoading] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [InitialValue, setInitialValues] = useState<EnrollementData | undefined>(undefined);
@@ -45,7 +40,6 @@ export default function Page() {
         "TERMINÉ": "COMPLETED",
         "ANNULÉ": "CANCELLED",
     };
-    const [results, setResults] = useState<EnrollementData[]>([]);
 
     const fetchefilterEnrollementsTableau = async (filter: FilterRequest) => {
         setLoading(true);
@@ -141,15 +135,13 @@ export default function Page() {
 
     const isDataEmpty = !loading && listes.length === 0;
 
-    async function handleChangeState(row: EnrollementData, newStates: string[]) {
-
-    }
-
+    async function handleChangeState(row: EnrollementData, newStates: string[]) {}
 
     const onClose = () => {
         setIsFormOpen(false);
         setInitialValues(undefined);
     }
+
     function handleUpdate(row: EnrollementData) {
         setInitialValues(row);
         setIsFormOpen(true);

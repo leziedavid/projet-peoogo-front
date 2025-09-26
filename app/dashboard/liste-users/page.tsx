@@ -2,28 +2,31 @@
 
 import { DataTable } from "@/components/table/dataTable";
 import { getUserColumns } from "@/types/columns/users-columns";
-import { useOrderSocket } from '@/lib/socket/useOrderSocket';
 import { User } from "@/types/ApiReponse/UsersResponse";
 import { useEffect, useState } from "react";
-import { getAllUser } from "@/api/services/authService";
+import { filterUsersmodeCarte, filterUsersmodeGraphique, filterUsersTableau, getAllUser } from "@/api/services/authService";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { DataTableSkeleton } from "@/components/table/data-table-skeleton";
 import FilesPreviewDialog from "@/components/form/filesPreviewDialog";
 import FilterUser from "@/components/filter/FilterUser";
-import { filterEnrollementsmodeCarte, filterEnrollementsmodeGraphique, filterEnrollementsTableau, getAllPaginate } from '@/api/services/enrollementsServices';
-import { EnrollementData } from "@/types/ApiReponse/enrollementControleResponse";
+import Image from 'next/image';
 import { EnrollementStatByDate, GeoCoord } from "@/types/ApiReponse/StatistiquesEnrollementResponse";
 import { toast } from "sonner";
 import AddUsersForms from "@/components/form/AddUsersForms";
 import { Role, TypeCompte, UserFormValues, UserStatus } from "@/types/ApiRequest/User";
 import { deleteUser } from "@/api/services/auth";
 import DeleteDialog from '@/components/Dialog/DeleteDialog';
-
+import EnrollementGraph from "@/components/chart/EnrollementGraph";
+// import EnrollementMap from "@/components/chart/EnrollementMap";
+import dynamic from "next/dynamic";
+const EnrollementMap = dynamic(() => import("@/components/chart/EnrollementMap"), {
+    ssr: false,
+});
 
 export default function Page() {
 
-    // useOrderSocket() 
+    // useOrderSocket()
 
     const [user, setUser] = useState<User[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -35,50 +38,47 @@ export default function Page() {
     const [previewUrl, setPreviewUrl] = useState("");
     const [dialogOpen, setDialogOpen] = useState(false);
     const [modeAffichage, setModeAffichage] = useState<'tableau' | 'carte' | 'graphique'>('tableau');
-    const [results, setResults] = useState<EnrollementData[]>([]);
-    const [listes, setListes] = useState<EnrollementData[]>([]);
     const [resultsGraphique, setResultsGraphique] = useState<EnrollementStatByDate[]>([]);
     const [resultsCarte, setResultsCarte] = useState<GeoCoord[]>([]);
     const [deleteDialog, setDeleteDialogOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
 
-
-    const fetchefilterEnrollementsTableau = async (filter: FilterRequest) => {
+    const fetchefilterUsersTableau = async (filter: FilterRequest) => {
         setLoading(true);
-        const data = await filterEnrollementsTableau(filter, currentPage, limit);
+        const data = await filterUsersTableau(filter, currentPage, limit);
         if (data.statusCode === 200) {
-            setListes(data?.data?.data ?? []);
+            setUser(data?.data?.data ?? []);
             setTotalItems(data?.data?.total ?? 0);
             setCurrentPage(data?.data?.page ?? 1);
             setLoading(false);
         } else {
             setLoading(false);
-            setListes([]);
+            setUser([]);
         }
     };
 
-    const fetchefilterEnrollementsmodeGraphique = async (filter: FilterRequest) => {
+    const fetchefilterUsersmodeGraphique = async (filter: FilterRequest) => {
         setLoading(true);
-        const data = await filterEnrollementsmodeGraphique(filter, currentPage, limit);
+        const data = await filterUsersmodeGraphique(filter, currentPage, limit);
         if (data.statusCode === 200) {
             setResultsGraphique(data?.data ?? []);
             setLoading(false);
         } else {
             setLoading(false);
-            setListes([]);
+            setUser([]);
         }
     };
 
-    const fetchefilterEnrollementsmodeCarte = async (filter: FilterRequest) => {
+    const fetchefilterUsersmodeCarte = async (filter: FilterRequest) => {
         setLoading(true);
-        const data = await filterEnrollementsmodeCarte(filter, currentPage, limit);
+        const data = await filterUsersmodeCarte(filter, currentPage, limit);
         if (data.statusCode === 200) {
             setResultsCarte(data?.data ?? []);
             setLoading(false);
         } else {
             setLoading(false);
-            setListes([]);
+            setUser([]);
         }
     };
 
@@ -90,16 +90,13 @@ export default function Page() {
             const mode = (filter.modeAffichage === 'tableau' || filter.modeAffichage === 'carte' || filter.modeAffichage === 'graphique') ? filter.modeAffichage : 'tableau';
             setModeAffichage(mode); // ✅ Met à jour le mode dans le state
 
-            console.log('Filtre appliqué:', filter);
-            console.log('Filtre appliqué:', filter);
-
             const handlers: Record<string, (f: FilterRequest) => void> = {
-                carte: fetchefilterEnrollementsmodeCarte,
-                graphique: fetchefilterEnrollementsmodeGraphique,
-                tableau: fetchefilterEnrollementsTableau,
+                carte: fetchefilterUsersmodeCarte,
+                graphique: fetchefilterUsersmodeGraphique,
+                tableau: fetchefilterUsersTableau,
             };
 
-            const handler = handlers[mode] || fetchefilterEnrollementsTableau;
+            const handler = handlers[mode] || fetchefilterUsersTableau;
             await handler({ ...filter, modeAffichage: mode });
 
         } catch (error) {
@@ -119,14 +116,22 @@ export default function Page() {
     };
 
     const fetchData = async () => {
+        setLoading(true);
         try {
             const res = await getAllUser(currentPage, limit);
-            if (res.data) {
+            if (res.data && res.statusCode === 200) {
+                setLoading(false);
                 setUser(res.data.data);
                 setTotalItems(res.data.total);
                 setCurrentPage(res.data.page);
+
+            } else {
+                setUser([]);
+                setLoading(false);
             }
+
         } catch (e) {
+            setLoading(false);
             console.error(e);
         }
     };
@@ -199,7 +204,7 @@ export default function Page() {
             toast.error("Vous êtes déjà sur la première page.");
         }
     }
-    
+
     function openUserForm() {
         setIsFormOpen(true);
     }
@@ -228,28 +233,53 @@ export default function Page() {
             </div>
 
 
-            {isDataEmpty ? (
+            {loading ? (
 
                 <DataTableSkeleton columnCount={5} rowCount={10} />
+
+            ) : isDataEmpty ? (
+
+                <div className="flex flex-col items-center justify-center mt-10 text-center">
+                    <Image src="/error.svg" alt="Aucune donnée" width={180} height={180} />
+                    <p className="mt-4 text-gray-600 text-sm">Aucune donnée trouvée</p>
+                </div>
 
             ) : (
 
                 <>
-                    <DataTable
-                        columns={getUserColumns(handlePreview)}
-                        data={user}
-                        onChangeState={handleChangeState}
-                        onUpdateData={handleUpdate}
-                        onDeleteData={handleDelete}
-                        onNextPage={handleNextPage}
-                        onPreviousPage={handlePreviousPage}
-                        currentPage={currentPage}
-                        totalItems={totalItems}
-                        itemsPerPage={limit}
-                    />
 
+                    <div className='mt-4'>
+                        <h3 className="text-lg font-semibold">Résultats de la recherche</h3>
+                        <p className="text-sm text-gray-600">{user.length} résultats trouvés</p>
+                    </div>
+
+                    {modeAffichage === 'tableau' && (
+
+                        <DataTable
+                            columns={getUserColumns(handlePreview)}
+                            data={user}
+                            onChangeState={handleChangeState}
+                            onUpdateData={handleUpdate}
+                            onDeleteData={handleDelete}
+                            onNextPage={handleNextPage}
+                            onPreviousPage={handlePreviousPage}
+                            currentPage={currentPage}
+                            totalItems={totalItems}
+                            itemsPerPage={limit}
+                        />
+
+                    )}
+
+                    {modeAffichage === 'graphique' && (
+                        <EnrollementGraph data={resultsGraphique} />
+                    )}
+
+                    {modeAffichage === 'carte' && (
+                        <EnrollementMap data={resultsCarte} />
+                    )}
 
                     <FilesPreviewDialog imageUrl={previewUrl} open={dialogOpen} onOpenChange={setDialogOpen} />
+
                 </>
 
             )}
@@ -257,11 +287,12 @@ export default function Page() {
             {isFormOpen && (
                 <AddUsersForms initialValue={initialValues} onClose={closeForm} isOpen={isFormOpen} fetchData={fetchData} />
             )}
-            
-                <DeleteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onConfirm={() => {  if (selectedId) handleDeleteClick(selectedId);}}/>
+
+            <DeleteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onConfirm={() => { if (selectedId) handleDeleteClick(selectedId); }} />
 
         </div>
     );
+
 }
 
 
