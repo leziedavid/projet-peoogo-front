@@ -16,11 +16,13 @@ import { ProductsRequest } from "@/types/ApiRequest/ProductsRequest";
 import { TypeCompte } from "@/types/ApiRequest/EnrollementRequest";
 import { UserEnrollementData } from "@/types/ApiReponse/userEnrollementData";
 import { SubmitHandler } from "react-hook-form";
-import { createProduct, updateProduct } from "@/api/services/productServices";
+import { createProduct, getAllCategories, updateProduct } from "@/api/services/productServices";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { NotificationModal } from "../Dialog/NotificationModal";
 import { tr } from "date-fns/locale";
+import { SelectMultipleWithSearch } from '../filter/SelectMultipleWithSearch';
+import { CategorieResponse } from "@/types/ApiReponse/ListeResponse";
 const RichTextEditor = dynamic(() => import("../rich-text-editor"), { ssr: false });
 
 const venteTypes = ["vente en gros", "vente en unité"];
@@ -35,6 +37,7 @@ const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
 const productSchema = z.object({
     id: z.string().optional(),
+    categorie: z.array(z.string()).optional(),
     nom: z.string().min(2, "Libellé requis"),
     paymentMethod: z.string().min(1, "Méthode requise"),
     unite: z.string().min(1, "Unité requise"),
@@ -78,6 +81,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState<string>("");
     const [statusCode, setStatusCode] = useState<number | null>(null);
+    const [categorie, setCategorie] = useState<CategorieResponse[]>([]);
 
     const [decoupage, setDecoupage] = useState({
         districtId: '',
@@ -95,10 +99,22 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
         return typeActeurs[0] as TypeCompte; // fallback si invalide ou absent
     }
 
+    const fetchCategories = async () => {
+        const res = await getAllCategories();
+        if (res.statusCode === 200 && res.data) {
+            setCategorie(res.data);
+        }
+    }
+
     const defaultTypeActeur = getValidTypeActeur(userEnrollementData?.enrollement?.TypeCompte);
+
     const toDateInputFormat = (isoString?: string) => {
         return isoString ? new Date(isoString).toISOString().split('T')[0] : '';
     };
+
+    // Récupérer les IDs des catégories depuis initialValues
+    const initialCategorieIds: string[] = initialValues?.categorie ?? [];
+
 
     // Puis utilisez cette assertion de type dans useForm :
     const {
@@ -108,28 +124,28 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
         formState: { errors, isValid },
         trigger,
         getValues,
-        setValue,
-    } = useForm<ProductsRequest>({
-        resolver: zodResolver(productSchema as any), // ← Assertion de type
-        mode: "onChange",
-        defaultValues: {
-            typeActeur: defaultTypeActeur,
-            ...initialValues,
-            description: initialValues?.description || "",
-            images: undefined,
-            autre_images: undefined,
-            disponibleDe: toDateInputFormat(initialValues?.disponibleDe),
-            disponibleJusqua: toDateInputFormat(initialValues?.disponibleJusqua),
-            decoupage: {
-                districtId: '',
-                regionId: '',
-                departmentId: '',
-                sousPrefectureId: '',
-                localiteId: '',
-                ...initialValues?.decoupage,
+        setValue, } = useForm<ProductsRequest>({
+            resolver: zodResolver(productSchema as any), // ← Assertion de type
+            mode: "onChange",
+            defaultValues: {
+                typeActeur: defaultTypeActeur,
+                ...initialValues,
+                description: initialValues?.description || "",
+                images: undefined,
+                autre_images: undefined,
+                disponibleDe: toDateInputFormat(initialValues?.disponibleDe),
+                disponibleJusqua: toDateInputFormat(initialValues?.disponibleJusqua),
+                decoupage: {
+                    districtId: '',
+                    regionId: '',
+                    departmentId: '',
+                    sousPrefectureId: '',
+                    localiteId: '',
+                    ...initialValues?.decoupage,
+                },
+                categorie: initialCategorieIds, // ✅ tableau de string
             },
-        },
-    });
+        });
 
 
     useEffect(() => {
@@ -208,6 +224,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
         formData.append('disponibleDe', data.disponibleDe);
         formData.append('disponibleJusqua', data.disponibleJusqua);
         formData.append('decoupage', JSON.stringify(decoupage));
+        formData.append('categories', JSON.stringify(data.categorie ?? [])); // ✅ string[]
         codeUsers && formData.append('codeUsers', codeUsers);
 
         if (files['images']) {
@@ -268,6 +285,11 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
 
     const allImages: string[] = initialValues?.allimages ?? [];
 
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+
     return (
         <>
 
@@ -295,6 +317,26 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                                 })
                             }
                         />
+                    </div>
+
+                    <div className="md:col-span-2">
+
+                        <Controller name="categorie" control={control} defaultValue={initialCategorieIds}
+                            render={({ field }) => (
+                                <div>
+                                    <label className="block mb-1 font-semibold" htmlFor="categories">
+                                        Catégorie (optionnel)
+                                    </label>
+                                    <SelectMultipleWithSearch
+                                        values={field.value ?? []}
+                                        onChange={field.onChange}
+                                        options={categorie ?? []}
+                                        placeholder="Sélectionnez une catégorie"
+                                    />
+                                </div>
+                            )}
+                        />
+
                     </div>
 
                     <div>
@@ -441,7 +483,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                             <CardContent>
                                 {initialValues?.imageUrl ? (
                                     <div className="relative w-40 h-40 aspect-square rounded-md overflow-hidden">
-                                        <Image src={initialValues.imageUrl} alt="Image principale" fill className="object-cover" loading="lazy" unoptimized/>
+                                        <Image src={initialValues.imageUrl} alt="Image principale" fill className="object-cover" loading="lazy" unoptimized />
                                     </div>
                                 ) : (
                                     <p className="text-muted-foreground text-center">Aucune image principale disponible.</p>

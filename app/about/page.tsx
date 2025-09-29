@@ -13,7 +13,7 @@ export default function Page() {
                 {/* Hero Section */}
                 {/* Hero Section */}
                 <section className="relative bg-green-100 py-20 px-6 text-center overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/legumes-cereales.jpg')" }} >
-                    <div className="bg-[#B07B5E]/10 bg-opacity-70 p-6 rounded-lg inline-block">
+                    <div className="bg-opacity-70 p-6 rounded-lg inline-block">
                         <h1 className="text-4xl md:text-5xl font-extrabold text-white animate-fadeIn">
                             Basés au Burkina Faso, nous sommes une jeune startup ambitieuse
                         </h1>

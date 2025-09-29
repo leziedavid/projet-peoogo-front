@@ -1,3 +1,5 @@
+import { CategorieResponse } from "./ListeResponse";
+
 // Types pour les sous-objets
 export interface Localite {
     id: string;
@@ -75,6 +77,7 @@ export interface UserInfo {
 
 export interface Product {
     id: string;
+    categories: CategorieResponse[];
     nom: string;
     code: string;
     description: string;

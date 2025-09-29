@@ -1,7 +1,7 @@
 
 import { Filtre } from '@/components/market/Market'
 import { EnrollementData } from '@/types/ApiReponse/enrollementControleResponse'
-import { ActiviteResponse, DepartmentResponse, DistrictResponse, LocaliteResponse, RegionResponse, SousPrefectureResponse, StatusDossier } from '@/types/ApiReponse/ListeResponse'
+import { ActiviteResponse, CategorieResponse, DepartmentResponse, DistrictResponse, LocaliteResponse, RegionResponse, SousPrefectureResponse, StatusDossier } from '@/types/ApiReponse/ListeResponse'
 import { Product } from '@/types/ApiReponse/ProduitsResponse'
 import { StatistiquesDesProduitsResponse } from '@/types/ApiReponse/StatistiquesDesProduitsResponse'
 import { UserEnrollementData } from '@/types/ApiReponse/userEnrollementData'
@@ -144,23 +144,36 @@ export const getAllProductsWithStatus = async (page: number = 1, limit: number =
     }
 }
 
-export const getAllProductsWithStatusOne = async (page: number = 1, limit: number = 10): Promise<BaseResponse<Pagination<Product>>> => {
+export const getAllProductsWithStatusOne = async (page: number = 1,limit: number = 10, selectedCategory: string | null = null): Promise<BaseResponse<Pagination<Product>>> => {
     try {
-        const response = await fetch(`${getBaseUrl()}/product/listes/produits-avec-statut?page=${page}&limit=${limit}`, {
+        // Construire l'URL avec des paramètres conditionnels
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+
+        // Ajouter catégorie uniquement si elle est définie et non vide
+        if (selectedCategory?.trim()) {
+            params.append('categorie', selectedCategory.trim());
+        }
+
+        const url = `${getBaseUrl()}/product/listes/produits-avec-statut?${params.toString()}`;
+
+        const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-
+                Authorization: `Bearer ${localStorage.getItem('access_token')}`,
             },
-        })
+        });
 
-        return await response.json()
+        return await response.json();
     } catch (error) {
-        console.error('Erreur lors de la récupération des produits :', error)
-        throw error
+        console.error('Erreur lors de la récupération des produits :', error);
+        throw error;
     }
-}
+};
+
 // geProduitstById
 
 export const geProduitstById = async (id: string): Promise<BaseResponse<Product>> => {
@@ -306,5 +319,66 @@ export const updateProductQuantity = async (productId: string, quantite: number)
     } catch (error) {
         console.error('Erreur lors de la mise à jour de la quantité :', error);
         throw error;
+    }
+};
+
+
+// getAllCategories
+
+export const getAllCategories = async (): Promise<BaseResponse<CategorieResponse[]>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/categories`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return await response.json()
+    } catch (error) {
+        console.error('Erreur lors de la récupération des catégories :', error)
+        throw error
+    }
+};
+
+export const createCategory = async (formData: FormData): Promise<BaseResponse<CategorieResponse>> => {
+    console.log('🚀 FormData view:', formData);
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/categories`, {
+            method: 'POST',
+            body: formData, // ✅ envoyer le FormData tel quel
+        });
+        return await response.json()
+    } catch (error) {
+        console.error('Erreur lors de la création du produit :', error)
+        throw error
+    }
+};
+
+export const updateCategory = async (id: string, formData: FormData): Promise<BaseResponse<CategorieResponse>> => {
+    console.log('🚀 FormData view:', formData);
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/categories/${id}`, {
+            method: 'PATCH',
+            body: formData, // ✅ envoyer le FormData tel quel
+        });
+        return await response.json()
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du produit :', error)
+        throw error
+    }
+};
+
+export const deleteCategory = async (id: string): Promise<BaseResponse<any>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/categories/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return await response.json()
+    } catch (error) {
+        console.error('Erreur lors de la suppression du produit :', error)
+        throw error
     }
 };

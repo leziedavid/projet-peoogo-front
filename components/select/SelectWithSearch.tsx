@@ -35,7 +35,11 @@ export function SelectWithSearch({value,onChange,placeholder = "Sélectionnez un
             <SelectTrigger className="w-full">
                 <SelectValue placeholder={placeholder} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent             position="popper"
+                    side="bottom"
+                    align="start"
+                    avoidCollisions={false} // 🔥 force toujours en bas
+                    className="max-h-80 overflow-y-auto">
                 <div className="p-2">
                     <Input
                         type="text"

@@ -2,9 +2,13 @@
 import { BaseResponse } from '@/types/BaseResponse';
 import { getBaseUrl } from '@/types/baseUrl';
 import { secureFetch } from './auth';
-import { SliderFormValues, PubliciteFormValues, ReglageFormValues } from '@/types/ApiRequest/Allinterfaces';
 import { Pagination } from '@/types/pagination';
 import { Partenaire, PaymentMethode, Publicite, Reglage, Slider } from '@/types/ApiReponse/adminApi';
+
+export interface FolderResponse {
+    name: string;
+    fileCount: number;
+}
 
 /* -------------------- SLIDER -------------------- */
 export const createSlider = async (formData: FormData): Promise<BaseResponse<Slider>> => {
@@ -410,3 +414,38 @@ export const getAllPaymentMethodesHome = async (): Promise<BaseResponse<PaymentM
         throw error;
     }
 };
+
+
+/**
+ * Récupérer la liste des dossiers
+ */
+export const fetchFolders = async (): Promise<BaseResponse<FolderResponse[]>> => {
+    try {
+        const response = await fetch(`${getBaseUrl()}/statistique/images/folders`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+        });
+
+        return (await response.json()) as BaseResponse<FolderResponse[]>;
+    } catch (error) {
+        console.error("Erreur lors de la récupération des dossiers :", error);
+        throw error;
+    }
+};
+
+
+// Récupère l'URL du zip généré
+export const downloadFolderApi = async (folder: string): Promise<BaseResponse<{ zipUrl: string }>> => {
+    const folderQuery = folder === 'Tous' ? '' : `?folder=${encodeURIComponent(folder)}`;
+    const response = await fetch(`${getBaseUrl()}/statistique/images/backup${folderQuery}`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+    });
+    return (await response.json()) as BaseResponse<{ zipUrl: string }>;
+};
+

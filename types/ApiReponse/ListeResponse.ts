@@ -7,6 +7,15 @@ export interface ActiviteResponse {
     updatedAt : string;
 }
 
+// CategorieResponse
+export interface CategorieResponse {
+    id: string;
+    nom: string;
+    status: string;
+    createdAt: string;
+    updatedAt : string;
+}
+
 // SpeculationsResponse
 export interface SpeculationsResponse{
     id: string;

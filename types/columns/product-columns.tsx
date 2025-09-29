@@ -95,6 +95,22 @@ export const columns: ColumnDef<Product>[] = [
             );
         }
     },
+    {
+        accessorKey: 'categories',
+        header: 'Catégorie',
+        cell: ({ row }) => {
+            const d = row.original.categories;
+            return (
+                <div className="text-sm leading-tight space-y-1">
+                    {d.map((categorie, index) => (
+                        <div key={index}>
+                            <strong>{categorie.nom}</strong>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+    },
 
     {
         accessorKey: 'nom',

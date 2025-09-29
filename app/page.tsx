@@ -20,7 +20,6 @@ export default function Page() {
       <div className={`min-h-[calc(100vh_-_56px)] py-10 px-3 lg:px-6 mt-[4rem] md:mt-[4rem]`}>
 
         <Slider />
-
         <HomeMarket />
         <AgricultureBanner />
         <Forms />

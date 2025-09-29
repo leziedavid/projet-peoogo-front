@@ -8,14 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Product } from '@/types/ApiReponse/ProduitsResponse';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from "next/link";
-import {ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '../ui/input';
-import { filterProductsWithStatus, getAllProductsWithStatusOne } from '@/api/services/productServices';
+import { filterProductsWithStatus, getAllCategories, getAllProductsWithStatusOne } from '@/api/services/productServices';
 import ProductLoader from './ProductLoader';
 import SelectFilterDecoupage from '../filter/SelectFilterDecoupage';
 import { getAllSpeculations } from '@/api/services/enrollementsServices';
-import { SpeculationsResponse } from '@/types/ApiReponse/ListeResponse';
+import { CategorieResponse, SpeculationsResponse } from '@/types/ApiReponse/ListeResponse';
 import { SelectWithSearchByProduit } from '../select/SelectWithSearchByProduit';
+import { Skeleton } from '../ui/skeleton';
+import SkeletonFiltres from './SkeletonFiltres';
 
 // Interface pour les filtres
 interface DecoupageData {
@@ -30,6 +32,7 @@ export interface Filtre {
     typeVente: string;
     decoupage: DecoupageData;
     categorie: string;
+    speculation: string;
     rating: string;
     prixMin: number;
     prixMax: number;
@@ -49,6 +52,7 @@ const filtresInitiaux: Filtre = {
         localiteId: '',
     },
     categorie: '',
+    speculation: '',
     rating: '',
     prixMin: 0,
     prixMax: 0,
@@ -76,15 +80,7 @@ export default function MyMarket() {
     const [totalItems, setTotalItems] = useState(0);
     const [limit] = useState(3);
     const [speculations, setSpeculations] = useState<SpeculationsResponse[]>([]);
-
-    // const [decoupage, setDecoupage] = useState({
-    //     districtId: '',
-    //     regionId: '',
-    //     departmentId: '',
-    //     sousPrefectureId: '',
-    //     localiteId: '',
-    //     ...filtresInitiaux?.decoupage,
-    // });
+    const [categories, setCategorie] = useState<CategorieResponse[]>([]);
 
     const getAllSpeculation = async () => {
         const res = await getAllSpeculations();
@@ -139,6 +135,7 @@ export default function MyMarket() {
         return (
             filtres.typeVente === '' &&
             filtres.categorie === '' &&
+            filtres.speculation === '' &&
             filtres.rating === '' &&
             filtres.prixMin === 0 &&
             filtres.prixMax === 0 &&
@@ -150,11 +147,12 @@ export default function MyMarket() {
     }
 
     function aDesFiltresActifs(filtres: Filtre): boolean {
-        const { typeVente, decoupage, categorie, rating, prixMin, prixMax, qteMin, qteMax, periode } = filtres;
+        const { typeVente, decoupage, categorie, speculation, rating, prixMin, prixMax, qteMin, qteMax, periode } = filtres;
 
         return (
             typeVente !== '' ||
             categorie !== '' ||
+            speculation !== '' ||
             rating !== '' ||
             prixMin > 0 ||
             prixMax > 0 ||
@@ -178,7 +176,7 @@ export default function MyMarket() {
                 setProducts([]);
                 setIsLoading(false);
             }
-        } catch (e : any) {
+        } catch (e: any) {
             console.error(e);
         }
     };
@@ -192,6 +190,17 @@ export default function MyMarket() {
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('fr-FR').format(price);
     };
+
+    const fetchCategories = async () => {
+        const res = await getAllCategories();
+        if (res.statusCode === 200 && res.data) {
+            setCategorie(res.data);
+        }
+    }
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -225,7 +234,7 @@ export default function MyMarket() {
 
     const validerFiltrage = async () => {
 
-        const { typeVente, decoupage, categorie, rating, prixMin, prixMax, qteMin, qteMax, periode } = filtresActifs;
+        const { typeVente, decoupage, categorie, speculation, rating, prixMin, prixMax, qteMin, qteMax, periode } = filtresActifs;
         // Toujours inclure toutes les clés du découpage, même si vides
         const decoupageFiltre: DecoupageData = {
             districtId: decoupage.districtId || '',
@@ -240,6 +249,7 @@ export default function MyMarket() {
             typeVente: typeVente || '',
             decoupage: decoupageFiltre,
             categorie: categorie || '',
+            speculation: speculation || '',
             rating: rating || '',
             prixMin: prixMin || 0,
             prixMax: prixMax || 0,
@@ -300,90 +310,111 @@ export default function MyMarket() {
                 <div className="w-full p-4 md:flex md:gap-8">
 
                     {/* Filtres - visibles à gauche sur desktop */}
+
                     <aside className="hidden md:block w-80 bg-white border rounded-lg p-4 h-fit space-y-4">
-                        <h3 className="font-bold text-lg"> Filtres</h3>
+                        <h3 className="font-bold text-lg">Filtres</h3>
 
-                        <div>
-                            <h4 className="font-semibold text-sm mb-1">Type de vente</h4>
-                            <div className="flex gap-2">
-                                <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'gros' })}
-                                    className={filtresActifs.typeVente === 'gros' ? 'bg-green-800 text-white cursor-pointer' : 'cursor-pointer'} >
-                                    Vente en gros
-                                </Badge>
-                                <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'detail' })}
-                                    className={filtresActifs.typeVente === 'detail' ? 'bg-green-800 text-white cursor-pointer' : 'cursor-pointer'} >
-                                    Vente en détail
-                                </Badge>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 className="font-semibold text-sm mb-1">Filtrer par découpage</h4>
-                            <SelectFilterDecoupage onChange={(value) => { appliquerFiltres({ decoupage: value }); }} />
-                        </div>
-
-                        <div>
-                            <h4 className="font-semibold text-sm mb-1">Les spéculations disponibles</h4>
-                            <SelectWithSearchByProduit value={filtresActifs.categorie}
-                                onChange={(value) => { appliquerFiltres({ categorie: value }); }}
-                                options={speculations}
-                                placeholder="Sélectionnez une spéculation principale"
-                            />
-                        </div>
-
-
-                        {/* Prix */}
-                        <div>
-                            <div className="flex gap-2">
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-sm mb-1">Prix min</h4>
-                                    <Input type="number" min={0} value={filtresActifs.prixMin || ''} onChange={(e) => appliquerFiltres({ prixMin: Number(e.target.value) })} />
+                        {isLoading ? (
+                            <SkeletonFiltres />
+                        ) : (
+                            <>
+                                {/* Type de vente */}
+                                <div>
+                                    <h4 className="font-semibold text-sm mb-1">Type de vente</h4>
+                                    <div className="flex gap-2">
+                                        <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'gros' })}
+                                            className={filtresActifs.typeVente === 'gros' ? 'bg-green-800 text-white cursor-pointer p-2' : 'cursor-pointer p-2'} >
+                                            Vente en gros
+                                        </Badge>
+                                        <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'detail' })}
+                                            className={filtresActifs.typeVente === 'detail' ? 'bg-green-800 text-white cursor-pointer p-2' : 'cursor-pointer p-2'} >
+                                            Vente en détail
+                                        </Badge>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-sm mb-1">Prix max</h4>
-                                    <Input type="number" min={0} value={filtresActifs.prixMax || ''} onChange={(e) => appliquerFiltres({ prixMax: Number(e.target.value) })} />
-                                </div>
-                            </div>
-                        </div>
 
-                        {/* Quantité */}
-                        <div>
-                            <div className="flex gap-2">
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-sm mb-1">Quantité min</h4>
-                                    <Input type="number" min={1} value={filtresActifs.qteMin || ''} onChange={(e) => appliquerFiltres({ qteMin: Number(e.target.value) })} />
+                                <div>
+                                    <h4 className="font-semibold text-sm">Catégories</h4>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {categories.map((cat) => (
+                                            <Badge  key={cat.id} variant="secondary" onClick={() => appliquerFiltres({ categorie: cat.id })}
+                                                className={filtresActifs.categorie === cat.id ? "bg-green-800 p-2 text-white cursor-pointer" : "p-2 cursor-pointer"} >
+                                                {cat.nom}
+                                            </Badge>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-sm mb-1">Quantité max</h4>
-                                    <Input type="number" min={1} value={filtresActifs.qteMax || ''} onChange={(e) => appliquerFiltres({ qteMax: Number(e.target.value) })} />
+
+                                <div>
+                                    <h4 className="font-semibold text-sm mb-1">Filtrer par découpage</h4>
+                                    <SelectFilterDecoupage onChange={(value) => { appliquerFiltres({ decoupage: value }); }} />
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* Période */}
-                        <div>
-                            <h4 className="font-semibold text-sm mb-1">Période</h4>
-                            <Select value={filtresActifs.periode || ''} onValueChange={(val) => appliquerFiltres({ periode: val })}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="--- Sélectionnez ---" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="24h">Dernières 24h</SelectItem>
-                                    <SelectItem value="7j">7 derniers jours</SelectItem>
-                                    <SelectItem value="30j">30 derniers jours</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                <div>
+                                    <h4 className="font-semibold text-sm mb-1">Les spéculations disponibles</h4>
+                                    <SelectWithSearchByProduit value={filtresActifs.speculation}
+                                        onChange={(value) => { appliquerFiltres({ speculation: value }); }}
+                                        options={speculations}
+                                        placeholder="Sélectionnez une spéculation"
+                                    />
+                                </div>
 
-                        {/* Actions */}
-                        <div className="flex gap-2">
-                            <Button className="flex-1 bg-[#B07B5E]  hover:bg-green-800 text-white" onClick={validerFiltrage}>
-                                Filtrer
-                            </Button>
-                            <Button className="flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={reinitialiserFiltres}>
-                                Réinitialiser
-                            </Button>
-                        </div>
+
+                                {/* Prix */}
+                                <div>
+                                    <div className="flex gap-2">
+                                        <div className="flex-1">
+                                            <h4 className="font-semibold text-sm mb-1">Prix min</h4>
+                                            <Input type="number" min={0} value={filtresActifs.prixMin || ''} onChange={(e) => appliquerFiltres({ prixMin: Number(e.target.value) })} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-semibold text-sm mb-1">Prix max</h4>
+                                            <Input type="number" min={0} value={filtresActifs.prixMax || ''} onChange={(e) => appliquerFiltres({ prixMax: Number(e.target.value) })} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Quantité */}
+                                <div>
+                                    <div className="flex gap-2">
+                                        <div className="flex-1">
+                                            <h4 className="font-semibold text-sm mb-1">Quantité min</h4>
+                                            <Input type="number" min={1} value={filtresActifs.qteMin || ''} onChange={(e) => appliquerFiltres({ qteMin: Number(e.target.value) })} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-semibold text-sm mb-1">Quantité max</h4>
+                                            <Input type="number" min={1} value={filtresActifs.qteMax || ''} onChange={(e) => appliquerFiltres({ qteMax: Number(e.target.value) })} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Période */}
+                                <div>
+                                    <h4 className="font-semibold text-sm mb-1">Période</h4>
+                                    <Select value={filtresActifs.periode || ''} onValueChange={(val) => appliquerFiltres({ periode: val })}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="--- Sélectionnez ---" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="24h">Dernières 24h</SelectItem>
+                                            <SelectItem value="7j">7 derniers jours</SelectItem>
+                                            <SelectItem value="30j">30 derniers jours</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-2">
+                                    <Button className="flex-1 bg-[#B07B5E]  hover:bg-green-800 text-white" onClick={validerFiltrage}>
+                                        Filtrer
+                                    </Button>
+                                    <Button className="flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={reinitialiserFiltres}>
+                                        Réinitialiser
+                                    </Button>
+                                </div>
+
+                            </>
+                        )}
                     </aside>
 
                     <div className="flex-1">
@@ -397,85 +428,103 @@ export default function MyMarket() {
                                     <div className="p-4 space-y-4">
                                         <h3 className="font-bold text-lg">Filtres</h3>
 
-                                        <div>
-                                            <h4 className="font-semibold text-sm">Type de vente</h4>
-                                            <div className="flex gap-2">
-                                                <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'gros' })} className={filtresActifs.typeVente === 'gros' ? 'bg-green-800 text-white cursor-pointer' : 'cursor-pointer'}  >
-                                                    Vente en gros
-                                                </Badge>
-                                                <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'detail' })} className={filtresActifs.typeVente === 'detail' ? 'bg-green-800 text-white cursor-pointer' : 'cursor-pointer'} >
-                                                    Vente en détail
-                                                </Badge>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 className="font-semibold text-sm mb-1">Filtrer par découpage</h4>
-                                            <SelectFilterDecoupage onChange={(value) => { appliquerFiltres({ decoupage: value }); }} />
-                                        </div>
-
-                                        <div>
-                                            <h4 className="font-semibold text-sm mb-1">Les spéculations disponibles</h4>
-                                            <SelectWithSearchByProduit value={filtresActifs.categorie}
-                                                onChange={(value) => { appliquerFiltres({ categorie: value }); }}
-                                                options={speculations}
-                                                placeholder="Sélectionnez une spéculation principale"
-                                            />
-                                        </div>
-
-                                        {/* Prix */}
-                                        <div>
-                                            <div className="flex gap-2">
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold text-sm mb-1">Prix min</h4>
-                                                    <Input type="number" min={0} value={filtresActifs.prixMin || ''} onChange={(e) => appliquerFiltres({ prixMin: Number(e.target.value) })} />
+                                        {isLoading ? (
+                                            <SkeletonFiltres />
+                                        ) : (
+                                            <>
+                                                <div>
+                                                    <h4 className="font-semibold text-sm">Type de vente</h4>
+                                                    <div className="flex gap-2">
+                                                        <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'gros' })} className={filtresActifs.typeVente === 'gros' ? 'bg-green-800 text-white cursor-pointer p-2' : 'cursor-pointer p-2'}  >
+                                                            Vente en gros
+                                                        </Badge>
+                                                        <Badge variant="secondary" onClick={() => appliquerFiltres({ typeVente: 'detail' })} className={filtresActifs.typeVente === 'detail' ? 'bg-green-800 text-white cursor-pointer p-2' : 'cursor-pointer p-2'} >
+                                                            Vente en détail
+                                                        </Badge>
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold text-sm mb-1">Prix max</h4>
-                                                    <Input type="number" min={0} value={filtresActifs.prixMax || ''} onChange={(e) => appliquerFiltres({ prixMax: Number(e.target.value) })} />
+
+                                                <div>
+                                                    <h4 className="font-semibold text-sm">Catégories</h4>
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        {categories.map((cat) => (
+                                                            <Badge key={cat.id} variant="secondary" onClick={() => appliquerFiltres({ categorie: cat.id })}
+                                                                className={filtresActifs.categorie === cat.id ? "bg-green-800 text-white cursor-pointer p-2" : "cursor-pointer p-2"} >
+                                                                {cat.nom}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Quantité */}
-                                        <div>
-                                            <div className="flex gap-2">
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold text-sm mb-1">Quantité min</h4>
-                                                    <Input type="number" min={1} value={filtresActifs.qteMin || ''} onChange={(e) => appliquerFiltres({ qteMin: Number(e.target.value) })} />
+                                                <div>
+                                                    <h4 className="font-semibold text-sm mb-1">Filtrer par découpage</h4>
+                                                    <SelectFilterDecoupage onChange={(value) => { appliquerFiltres({ decoupage: value }); }} />
                                                 </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold text-sm mb-1">Quantité max</h4>
-                                                    <Input type="number" min={1} value={filtresActifs.qteMax || ''} onChange={(e) => appliquerFiltres({ qteMax: Number(e.target.value) })} />
+
+                                                <div>
+                                                    <h4 className="font-semibold text-sm mb-1">Les spéculations disponibles</h4>
+                                                    <SelectWithSearchByProduit value={filtresActifs.speculation}
+                                                        onChange={(value) => { appliquerFiltres({ speculation: value }); }}
+                                                        options={speculations}
+                                                        placeholder="Sélectionnez une spéculation principale"
+                                                    />
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Période */}
-                                        <div>
-                                            <h4 className="font-semibold text-sm mb-1">Période</h4>
-                                            <Select value={filtresActifs.periode || ''} onValueChange={(val) => appliquerFiltres({ periode: val })}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="--- Sélectionnez ---" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="24h">Dernières 24h</SelectItem>
-                                                    <SelectItem value="7j">7 derniers jours</SelectItem>
-                                                    <SelectItem value="30j">30 derniers jours</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                                {/* Prix */}
+                                                <div>
+                                                    <div className="flex gap-2">
+                                                        <div className="flex-1">
+                                                            <h4 className="font-semibold text-sm mb-1">Prix min</h4>
+                                                            <Input type="number" min={0} value={filtresActifs.prixMin || ''} onChange={(e) => appliquerFiltres({ prixMin: Number(e.target.value) })} />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h4 className="font-semibold text-sm mb-1">Prix max</h4>
+                                                            <Input type="number" min={0} value={filtresActifs.prixMax || ''} onChange={(e) => appliquerFiltres({ prixMax: Number(e.target.value) })} />
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                        {/* Actions */}
-                                        <div className="flex gap-2">
-                                            <Button className="flex-1 bg-[#B07B5E]  hover:bg-green-800 text-white" onClick={validerFiltrage}>
-                                                Filtrer
-                                            </Button>
-                                            <Button className="flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={reinitialiserFiltres}>
-                                                Réinitialiser
-                                            </Button>
-                                        </div>
+                                                {/* Quantité */}
+                                                <div>
+                                                    <div className="flex gap-2">
+                                                        <div className="flex-1">
+                                                            <h4 className="font-semibold text-sm mb-1">Quantité min</h4>
+                                                            <Input type="number" min={1} value={filtresActifs.qteMin || ''} onChange={(e) => appliquerFiltres({ qteMin: Number(e.target.value) })} />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h4 className="font-semibold text-sm mb-1">Quantité max</h4>
+                                                            <Input type="number" min={1} value={filtresActifs.qteMax || ''} onChange={(e) => appliquerFiltres({ qteMax: Number(e.target.value) })} />
+                                                        </div>
+                                                    </div>
+                                                </div>
 
+                                                {/* Période */}
+                                                <div>
+                                                    <h4 className="font-semibold text-sm mb-1">Période</h4>
+                                                    <Select value={filtresActifs.periode || ''} onValueChange={(val) => appliquerFiltres({ periode: val })}>
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="--- Sélectionnez ---" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="24h">Dernières 24h</SelectItem>
+                                                            <SelectItem value="7j">7 derniers jours</SelectItem>
+                                                            <SelectItem value="30j">30 derniers jours</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+
+                                                {/* Actions */}
+                                                <div className="flex gap-2">
+                                                    <Button className="flex-1 bg-[#B07B5E]  hover:bg-green-800 text-white" onClick={validerFiltrage}>
+                                                        Filtrer
+                                                    </Button>
+                                                    <Button className="flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={reinitialiserFiltres}>
+                                                        Réinitialiser
+                                                    </Button>
+                                                </div>
+
+                                            </>
+                                        )}
                                     </div>
                                 </SheetContent>
                             </Sheet>
@@ -487,16 +536,6 @@ export default function MyMarket() {
                                 Résultats : {products.length}
                             </h2>
 
-                            {/* <div className="flex items-center w-full md:w-auto">
-                                <label className="sr-only">Search</label>
-                                <div className="relative w-full md:w-80">
-                                    <input type="text" id="voice-search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-gray-50 border border-gray-100 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Rechercher un produit..." />
-                                    <div className="absolute inset-y-0 end-0 flex items-center pe-3">
-                                        <Search />
-                                    </div>
-                                </div>
-                            </div> */}
-                            
                         </div>
 
                         <div className="md:container md:mx-auto mt-5">
@@ -505,7 +544,7 @@ export default function MyMarket() {
                                 <ProductLoader />
 
                             ) : isDataEmpty ? (
-                                
+
                                 <div className="flex flex-col items-center justify-center mt-10 text-center">
                                     <Image
                                         src="/error.svg"
@@ -518,7 +557,7 @@ export default function MyMarket() {
                             ) : (
                                 <>
 
-                                {/* <pre>{JSON.stringify(products, null, 2)}</pre> */}
+                                    {/* <pre>{JSON.stringify(products, null, 2)}</pre> */}
 
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                         {products.map((product) => (

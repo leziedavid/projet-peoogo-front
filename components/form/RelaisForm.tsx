@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { deleteProduct, getProducteurProductsByCode, getProducteurProductStats, getUserEnrollementDataByCode } from '@/api/services/productServices';
 import { UserEnrollementData } from '@/types/ApiReponse/userEnrollementData';
 import { toast } from "sonner";
-import { Product } from '@/types/ApiReponse/ProduitsResponse';
+import { Decoupage, Product } from '@/types/ApiReponse/ProduitsResponse';
 import { DataTable } from '@/components/table/dataTable';
 import { columns as ProductColumns } from "@/types/columns/product-columns";
 import DashboardProduct from '@/components/dash/DashboardProduct';
@@ -22,8 +22,8 @@ interface Props {
     initialValues?: Partial<EnrollementRequest>;
 }
 
-export default function RelaisForm({}: Props) {
-    
+export default function RelaisForm({ }: Props) {
+
     const [activeTab, setActiveTab] = useState<'liste' | 'ajout'>('liste');
     const [code, setCode] = useState('');
     const [isVerified, setIsVerified] = useState(false);
@@ -96,7 +96,26 @@ export default function RelaisForm({}: Props) {
     }
 
     function handleUpdate(row: any) {
-        setInitialValues(row)
+        // On construit un objet propre qui respecte ProductsRequest (sans images)
+        const productUpdateData: Omit<ProductsRequest, "images" | "autre_images"> = {
+            id: row.id ?? "",
+            categorie: row.categories?.map((cat: { id: string }) => cat.id) ?? [],
+            nom: row.nom ?? "",
+            paymentMethod: row.paymentMethod ?? "",
+            unite: row.unite ?? "",
+            quantite: row.quantite ?? 0,
+            prixUnitaire: row.prixUnitaire ?? 0,
+            prixEnGros: row.prixEnGros ?? 0,
+            saleType: row.saleType ?? "",
+            typeActeur: row.typeActeur ?? ("" as any), // si tu n'es pas sûr du type
+            disponibleDe: row.disponibleDe ?? "",
+            disponibleJusqua: row.disponibleJusqua ?? "",
+            description: row.description ?? "",
+            decoupage: row.decoupage ?? {} as Decoupage,
+            imageUrl: row.imageUrl ?? undefined, // utile si tu veux pré-afficher
+            allimages: row.allimages ?? [],      // idem
+        };
+        setInitialValues(productUpdateData);
         setActiveTab('ajout');
     }
 
@@ -206,11 +225,11 @@ export default function RelaisForm({}: Props) {
                                     {activeTab === 'ajout' && (
                                         <div className="mt-6">
                                             <ProductForm
-                                            initialValues={initialValues ?? undefined}
-                                            userEnrollementData={userEnrollementData ?? null }
-                                            fechproductsByCode={fechproductsByCode}
-                                            setActiveTab={setActiveTab}
-                                            codeUsers={code.trim()}
+                                                initialValues={initialValues ?? undefined}
+                                                userEnrollementData={userEnrollementData ?? null}
+                                                fechproductsByCode={fechproductsByCode}
+                                                setActiveTab={setActiveTab}
+                                                codeUsers={code.trim()}
                                             />
                                         </div>
                                     )}
@@ -220,8 +239,8 @@ export default function RelaisForm({}: Props) {
 
                         )}
                     </div>
-                    
-                    <DeleteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onConfirm={() => {  if (selectedId) handleDeleteClick(selectedId);}}/>
+
+                    <DeleteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onConfirm={() => { if (selectedId) handleDeleteClick(selectedId); }} />
                 </div>
 
             </div>

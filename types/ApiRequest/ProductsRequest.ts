@@ -1,10 +1,8 @@
 // ProductRequest.ts
-
 import { Decoupage, TypeCompte } from "./EnrollementRequest";
-
-
 export interface ProductsRequest {
     id?: string;
+    categorie: string[];
     nom: string;
     paymentMethod: string;
     unite: string;

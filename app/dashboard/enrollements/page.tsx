@@ -36,6 +36,14 @@ const Page = () => {
             icon: Download,
             description: 'Autres professionnels du secteur'
         },
+        {
+            id: 'export-images',
+            title: 'SAUVEGARDE DES IMAGES',
+            icon: Download,
+            description: 'espace de stockage des images'
+        },
+        
+
     ];
 
     const onClickContinue = (type: string) => {
@@ -52,6 +60,10 @@ const Page = () => {
 
             case 'export':
                 router.push('/dashboard/exports');
+                break;
+
+            case 'export-images':
+                router.push('/dashboard/export-images');
                 break;
 
 

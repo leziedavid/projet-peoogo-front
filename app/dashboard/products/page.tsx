@@ -1,16 +1,14 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import HeaderMarket from '@/components/market/HeaderMarket';
 import ProductForm from '@/components/form/ProductForms';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { deleteProduct, getProducteurProductsByCode, getProducteurProductStats, getUserEnrollementDataByCode } from '@/api/services/productServices';
 import { UserEnrollementData } from '@/types/ApiReponse/userEnrollementData';
 import { toast } from "sonner";
-import { ProductRequest } from '@/types/ApiRequest/ProductRequest';
-import { Product } from '@/types/ApiReponse/ProduitsResponse';
+import { Decoupage, Product } from '@/types/ApiReponse/ProduitsResponse';
 import { DataTable } from '@/components/table/dataTable';
 import { columns as ProductColumns } from "@/types/columns/product-columns";
 import DashboardProduct from '@/components/dash/DashboardProduct';
@@ -35,9 +33,6 @@ export default function Page() {
     const [deleteDialog, setDeleteDialogOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [isFormOpen, setIsFormOpen] = useState(false);
-
-    const [isLoading, startTransition] = useTransition();
     const [editData, setEditData] = useState<Product | null>(null); // Corrigé le nom de la variable
     const [statistique, setStatistique] = useState<StatistiquesDesProduitsResponse | null>(null);
 
@@ -113,7 +108,27 @@ export default function Page() {
     }
 
     function handleUpdate(row: any) {
-        setInitialValues(row)
+        // On construit un objet propre qui respecte ProductsRequest (sans images)
+        const productUpdateData: Omit<ProductsRequest, "images" | "autre_images"> = {
+            id: row.id ?? "",
+            categorie: row.categories?.map((cat: { id: string }) => cat.id) ?? [],
+            nom: row.nom ?? "",
+            paymentMethod: row.paymentMethod ?? "",
+            unite: row.unite ?? "",
+            quantite: row.quantite ?? 0,
+            prixUnitaire: row.prixUnitaire ?? 0,
+            prixEnGros: row.prixEnGros ?? 0,
+            saleType: row.saleType ?? "",
+            typeActeur: row.typeActeur ?? ("" as any), // si tu n'es pas sûr du type
+            disponibleDe: row.disponibleDe ?? "",
+            disponibleJusqua: row.disponibleJusqua ?? "",
+            description: row.description ?? "",
+            decoupage: row.decoupage ?? {} as Decoupage,
+            imageUrl: row.imageUrl ?? undefined, // utile si tu veux pré-afficher
+            allimages: row.allimages ?? [],      // idem
+        };
+
+        setInitialValues(productUpdateData);
         setActiveTab('ajout');
     }
 
@@ -176,12 +191,12 @@ export default function Page() {
                         <>
                             <Card className="w-full max-w-md shadow-lg mt-6">
                                 <CardHeader>
-                                        <CardTitle className="text-center text-[#B07B5E] uppercase">Identification Producteur</CardTitle>
+                                    <CardTitle className="text-center text-[#B07B5E] uppercase">Identification Producteur</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex flex-col gap-4">
                                     <div>
                                         <label className="font-medium text-sm">CODE PRODUCTEUR</label>
-                                        <Input  placeholder="Entrer le code" value={code} onChange={(e) => setCode(e.target.value)} />
+                                        <Input placeholder="Entrer le code" value={code} onChange={(e) => setCode(e.target.value)} />
                                     </div>
                                     <Button onClick={handleVerifyCode} className="w-full bg-[#B07B5E] hover:bg-[#045d28] text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200" >
                                         Vérifier
@@ -218,11 +233,11 @@ export default function Page() {
                                 {activeTab === 'ajout' && (
                                     <div className="mt-6">
                                         <ProductForm
-                                        initialValues={initialValues ?? undefined}
-                                        userEnrollementData={userEnrollementData ?? null }
-                                        fechproductsByCode={fechproductsByCode}
-                                        setActiveTab={setActiveTab}
-                                        codeUsers={code.trim()}
+                                            initialValues={initialValues ?? undefined}
+                                            userEnrollementData={userEnrollementData ?? null}
+                                            fechproductsByCode={fechproductsByCode}
+                                            setActiveTab={setActiveTab}
+                                            codeUsers={code.trim()}
                                         />
                                     </div>
                                 )}
@@ -232,8 +247,8 @@ export default function Page() {
 
                     )}
                 </div>
-                
-                <DeleteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onConfirm={() => {  if (selectedId) handleDeleteClick(selectedId);}}/>
+
+                <DeleteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onConfirm={() => { if (selectedId) handleDeleteClick(selectedId); }} />
 
             </div>
         </>

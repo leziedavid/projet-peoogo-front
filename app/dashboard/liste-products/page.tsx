@@ -1,15 +1,10 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
-import { Button } from '@/components/ui/button';
-import HeaderMarket from '@/components/market/HeaderMarket';
+import { useEffect, useState } from 'react';
 import ProductForm from '@/components/form/ProductForms';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { deleteProduct, getAllProductsAdmin, getGlobalProductStats } from '@/api/services/productServices';
 import { DecoupageWithRelations, Enrollement, UserEnrollementData, UsersData } from '@/types/ApiReponse/userEnrollementData';
 import { toast } from "sonner";
-import { ProductRequest } from '@/types/ApiRequest/ProductRequest';
 import { Decoupage, Product } from '@/types/ApiReponse/ProduitsResponse';
 import { DataTable } from '@/components/table/dataTable';
 import { columns as ProductColumns } from "@/types/columns/product-columns";
@@ -23,8 +18,6 @@ export default function Page() {
 
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState<'liste' | 'ajout'>('liste');
-    const [code, setCode] = useState('');
-    const [isVerified, setIsVerified] = useState(false);
     const [userEnrollementData, setUserEnrollementData] = useState<UserEnrollementData | null>(null);
     const [initialValues, setInitialValues] = useState<ProductsRequest | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -35,12 +28,7 @@ export default function Page() {
     const [deleteDialog, setDeleteDialogOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [isFormOpen, setIsFormOpen] = useState(false);
-
-    const [isLoading, startTransition] = useTransition();
-    const [editData, setEditData] = useState<Product | null>(null); // Corrigé le nom de la variable
     const [statistique, setStatistique] = useState<StatistiquesDesProduitsResponse | null>(null);
-
 
     const fechAllProductsAdmin = async () => {
 
@@ -97,6 +85,7 @@ export default function Page() {
         // On construit un objet propre qui respecte ProductsRequest (sans images)
         const productUpdateData: Omit<ProductsRequest, "images" | "autre_images"> = {
             id:row.id ?? "",
+            categorie: row.categories?.map((cat: { id: string }) => cat.id) ?? [],
             nom: row.nom ?? "",
             paymentMethod: row.paymentMethod ?? "",
             unite: row.unite ?? "",

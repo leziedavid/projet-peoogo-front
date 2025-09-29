@@ -9,25 +9,27 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import ProductLoader from './ProductLoader';
 import { useRouter } from "next/navigation";
-import { getAllProductsWithStatusOne } from '@/api/services/productServices';
+import { getAllCategories, getAllProductsWithStatusOne } from '@/api/services/productServices';
+import { CategorieResponse } from '@/types/ApiReponse/ListeResponse';
+import SkeletonCategorie from './SkeletonCategorie';
 
 export default function HomeMarket() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    // const [totalItems, setTotalItems] = useState(0);
+    const [categories, setCategorie] = useState<CategorieResponse[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
     const [limit] = useState(8);
     const router = useRouter();
 
     const getAllProductsWithStatus = async () => {
         try {
-
             setIsLoading(true);
-            const res = await getAllProductsWithStatusOne(currentPage, limit);
+            const res = await getAllProductsWithStatusOne(currentPage, limit, selectedCategory);
             if (res.statusCode === 200 && res.data) {
                 setProducts(res.data.data);
-                // setTotalItems(res.data.total);
                 setCurrentPage(res.data.page);
                 setIsLoading(false);
             } else {
@@ -41,8 +43,7 @@ export default function HomeMarket() {
 
     useEffect(() => {
         getAllProductsWithStatus();
-    }, [currentPage]);
-
+    }, [currentPage, selectedCategory]);
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('fr-FR').format(price);
@@ -59,21 +60,42 @@ export default function HomeMarket() {
         return `il y a ${diffDays} jours`;
     };
 
+    const fetchCategories = async () => {
+        const res = await getAllCategories();
+        if (res.statusCode === 200 && res.data) {
+            setCategorie(res.data);
+        }
+    }
+
     useEffect(() => {
-        // Simulation d'un chargement de 5 secondes
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 5000);
-
-        return () => clearTimeout(timer);
+        fetchCategories();
     }, []);
-
 
     const isDataEmpty = !isLoading && products.length === 0;
 
 
     return (
         <div className="md:container md:mx-auto mt-5">
+
+            {/* Skeleton ou catégories */}
+            {isLoading ? (
+                <SkeletonCategorie />
+            ) : (
+                <div className="flex gap-2 flex-wrap mb-6 justify-center">
+                    {/* Badge "Tous" */}
+                    <Badge key="all" variant="secondary" onClick={() => setSelectedCategory(null)} className={`cursor-pointer px-4 py-2 text-sm rounded-lg transition ${selectedCategory === null ? "bg-green-800 text-white" : "bg-gray-100" }`} >
+                        Tous
+                    </Badge>
+
+                    {categories.map((cat) => (
+                        <Badge key={cat.id} variant="secondary" onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id) }
+                            className={`cursor-pointer px-4 py-2 text-sm rounded-lg transition ${selectedCategory === cat.id ? "bg-green-800 text-white" : "bg-gray-100"}`} >
+                            {cat.nom}
+                        </Badge>
+                    ))}
+                </div>
+            )}
+
             {isLoading ? (
 
                 <ProductLoader />
@@ -81,11 +103,7 @@ export default function HomeMarket() {
             ) : isDataEmpty ? (
 
                 <div className="flex flex-col items-center justify-center mt-10 text-center">
-                    <Image src="/error.svg"
-                        alt="Aucune donnée"
-                        width={180}
-                        height={180}
-                    />
+                    <Image src="/error.svg" alt="Aucune donnée" width={180} height={180} />
                     <p className="mt-4 text-gray-600 text-sm">Aucune donnée trouvée</p>
                 </div>
             ) : (
@@ -140,6 +158,7 @@ export default function HomeMarket() {
 
                 </>
             )}
+
         </div>
     );
 }
