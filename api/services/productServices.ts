@@ -327,10 +327,11 @@ export const updateProductQuantity = async (productId: string, quantite: number)
 
 export const getAllCategories = async (): Promise<BaseResponse<CategorieResponse[]>> => {
     try {
-        const response = await secureFetch(`${getBaseUrl()}/categories`, {
+        const response = await fetch(`${getBaseUrl()}/categories`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
         });
         return await response.json()
