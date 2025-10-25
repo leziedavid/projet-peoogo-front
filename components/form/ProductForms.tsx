@@ -28,7 +28,7 @@ const RichTextEditor = dynamic(() => import("../rich-text-editor"), { ssr: false
 const venteTypes = ["vente en gros", "vente en unité"];
 const paymentMethods = ["Mobile Money", "Espèces", "Carte Bancaire"];
 const typeActeurs = ["AGRICULTEURS", "AQUACULTEURS", "AUTRE_ACTEURS", "APICULTEURS", "REVENDEUR", "TRANSFORMATEUR", "ACHETEUR"];
-const unites = ["KG", "SAC", "TRICYCLE", "TONNE", 'BOITE'];
+const unites = ["KG", "SAC", "TRICYCLE", "TONNE", 'BOITE','PLANCHES','PIECES','LITRES'];
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
 // =====================================================

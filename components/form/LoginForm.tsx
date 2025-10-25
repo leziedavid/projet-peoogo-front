@@ -140,9 +140,10 @@ export default function LoginForm() {
                     {isSubmitting ? 'Connexion...' : 'Suivant'}
                 </Button>
 
-                <Button variant="outline" className="w-full text-green-800 hover:bg-green-900 hover:text-white">
+                <Link href="/" className="inline-block w-full px-4 py-1 text-center bg-white text-green-800 border border-green-800 rounded hover:bg-[#B07B5E] hover:text-white transition-colors duration-200">
                     Accueil
-                </Button>
+                </Link>
+
             </form>
             <div className="flex items-center justify-between mt-4 text-sm">
 
