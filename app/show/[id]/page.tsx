@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, ShoppingCart } from "lucide-react";
+import { MapPin } from "lucide-react";
 import BuyingOptions from "@/components/BuyingOptions";
 import HeaderMarket from "@/components/market/HeaderMarket";
 import { Footer } from "@/components/home/Footer";
@@ -12,6 +11,7 @@ import { Product } from "@/types/ApiReponse/ProduitsResponse";
 import { geProduitstById } from "@/api/services/productServices";
 import { useParams } from "next/navigation"
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 
 // Fake data
 const detailProduit = {
@@ -166,11 +166,11 @@ export default function ShowProduct() {
                         <div className="w-full min-h-screen bg-white px-4 py-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                                 <div className="flex flex-col px-2 md:px-4">
-                                    <Image src={dataImages[selectedImageIndex] || "/astronaut-grey-scale.svg"} alt={detailProduit.nom} width={400} height={400} sizes="400px" className="rounded-2xl w-full h-auto object-cover" unoptimized/>                                    {/* Slider des thumbnails */}
+                                    <Image src={dataImages[selectedImageIndex] || "/astronaut-grey-scale.svg"} alt={detailProduit.nom} width={400} height={400} sizes="400px" className="rounded-2xl w-full h-auto object-cover" unoptimized />                                    {/* Slider des thumbnails */}
                                     <div className="flex gap-2 mt-4 overflow-x-auto">
                                         {/* {detailProduit.images.map((img, index) => ( */}
                                         {dataImages.map((img, index) => (
-                                            <Image key={index} src={img || "/astronaut-grey-scale.svg"} alt={`thumbnail-${index}`} width={80} height={80} onClick={() => setSelectedImageIndex(index)} className="rounded-md object-cover border border-gray-200 flex-shrink-0" unoptimized/>
+                                            <Image key={index} src={img || "/astronaut-grey-scale.svg"} alt={`thumbnail-${index}`} width={80} height={80} onClick={() => setSelectedImageIndex(index)} className="rounded-md object-cover border border-gray-200 flex-shrink-0" unoptimized />
                                         ))}
                                     </div>
                                 </div>
@@ -178,8 +178,10 @@ export default function ShowProduct() {
                                 <div className="flex flex-col gap-4 px-2 md:px-4">
                                     <h2 className="text-2xl font-bold break-words">{detailProduit.nom}</h2>
                                     <p className="text-sm text-gray-600">{detailProduit.saleType}</p>
+                                    <Badge variant="outline" className={`text-xs text-[10px] py-[1px] px-1 rounded-md ${detailProduit.statut === "disponible" ? "bg-green-100 text-green-700 border border-green-300" : "bg-red-100 text-red-700 border border-red-300"}`}>
+                                        Produit :  {detailProduit.statut}
+                                    </Badge>
                                     <p className="text-[#B07B5E] text-sm">  Publié {formatDate(detailProduit.createdAt)} </p>
-
                                     <div className="flex gap-2 items-center">
                                         <MapPin className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm">
@@ -198,8 +200,9 @@ export default function ShowProduct() {
                                         Quantité disponible : {detailProduit.quantite} {detailProduit.unite}
                                     </p>
 
-                                    <BuyingOptions product={detailProduit} />
-
+                                    {detailProduit.statut === "disponible" && (
+                                        <BuyingOptions product={detailProduit} />
+                                    )}
                                     <div className="text-xs text-gray-500 italic">
                                         Veuillez vous connecter pour acheter ce produit.
                                     </div>

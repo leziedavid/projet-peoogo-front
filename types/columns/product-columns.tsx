@@ -1,3 +1,6 @@
+
+'use client';
+
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +11,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { PeriodeDisponibiliteCell } from './PeriodeDisponibiliteCell';
 import { QuantiteCell } from './QuantiteCell';
+import { updateProductStatus } from '@/api/services/productServices';
+import { toast } from 'sonner';
 
 
 function calculerStatutProduit(disponibleDe: string, disponibleJusqua: string): 'disponible' | 'indisponible' {
@@ -20,12 +25,17 @@ function calculerStatutProduit(disponibleDe: string, disponibleJusqua: string): 
 
 
 // 📦 API de mise à jour du status (à adapter selon ton service réel)
-const updateProductStatus = async (id: string, newStatus: 'ACTIVE' | 'INACTIVE') => {
+const ProductStatusSwitchUpdate = async (id: string, newStatus: 'ACTIVE' | 'INACTIVE') => {
 
     try {
+        const response = await updateProductStatus(id, newStatus);
+        if (response.statusCode === 200) {
+            toast.success('Statut mis à jour avec succès');
+        }
         console.log(`Produit ${id} mis à jour vers le statut : ${newStatus}`);
         // await tonService.updateStatus(id, newStatus);
     } catch (error) {
+        toast.error('Erreur de mise à jour du statut');
         console.error('Erreur de mise à jour du statut', error);
     }
 };
@@ -40,7 +50,7 @@ const ProductStatusSwitch: React.FC<{ row: any }> = ({ row }) => {
     const handleToggle = async (value: boolean) => {
         setChecked(value);
         const newStatus = value ? 'ACTIVE' : 'INACTIVE';
-        await updateProductStatus(id, newStatus);
+        await ProductStatusSwitchUpdate(id, newStatus);
     };
 
     return (

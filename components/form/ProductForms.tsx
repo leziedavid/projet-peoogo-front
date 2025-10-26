@@ -31,6 +31,7 @@ const typeActeurs = ["AGRICULTEURS", "AQUACULTEURS", "AUTRE_ACTEURS", "APICULTEU
 const unites = ["KG", "SAC", "TRICYCLE", "TONNE", 'BOITE','PLANCHES','PIECES','LITRES'];
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
+
 // =====================================================
 // Solution 2: Adapter le schéma Zod au type ProductsRequest existant
 // Modifiez votre schéma pour qu'il corresponde exactement à ProductsRequest :

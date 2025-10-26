@@ -144,7 +144,7 @@ export const getAllProductsWithStatus = async (page: number = 1, limit: number =
     }
 }
 
-export const getAllProductsWithStatusOne = async (page: number = 1,limit: number = 10, selectedCategory: string | null = null): Promise<BaseResponse<Pagination<Product>>> => {
+export const getAllProductsWithStatusOne = async (page: number = 1, limit: number = 10, selectedCategory: string | null = null): Promise<BaseResponse<Pagination<Product>>> => {
     try {
         // Construire l'URL avec des paramètres conditionnels
         const params = new URLSearchParams({
@@ -322,6 +322,27 @@ export const updateProductQuantity = async (productId: string, quantite: number)
     }
 };
 
+
+export const updateProductStatus = async (productId: string, status: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'): Promise<BaseResponse<Product>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/product/${productId}/status/update/product`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erreur serveur (${response.status})`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut :', error);
+        throw error;
+    }
+};
 
 // getAllCategories
 
