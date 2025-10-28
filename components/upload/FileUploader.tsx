@@ -127,8 +127,8 @@ export function FileUploader({
         'application/pdf': [],
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [],
     },
-    maxSize = 1024 * 1024 * 2,
-    maxFiles = 1,
+    maxSize = 1024 * 1024 * 10, // 10MB
+    maxFiles = 3,
     multiple = false,
     disabled = false,
     className,

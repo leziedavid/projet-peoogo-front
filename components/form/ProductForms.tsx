@@ -17,20 +17,18 @@ import { TypeCompte } from "@/types/ApiRequest/EnrollementRequest";
 import { UserEnrollementData } from "@/types/ApiReponse/userEnrollementData";
 import { SubmitHandler } from "react-hook-form";
 import { createProduct, getAllCategories, updateProduct } from "@/api/services/productServices";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import { NotificationModal } from "../Dialog/NotificationModal";
-import { tr } from "date-fns/locale";
 import { SelectMultipleWithSearch } from '../filter/SelectMultipleWithSearch';
 import { CategorieResponse } from "@/types/ApiReponse/ListeResponse";
+import { ProductImagesManager } from "./ProductImagesManager";
 const RichTextEditor = dynamic(() => import("../rich-text-editor"), { ssr: false });
 
 const venteTypes = ["vente en gros", "vente en unité"];
 const paymentMethods = ["Mobile Money", "Espèces", "Carte Bancaire"];
 const typeActeurs = ["AGRICULTEURS", "AQUACULTEURS", "AUTRE_ACTEURS", "APICULTEURS", "REVENDEUR", "TRANSFORMATEUR", "ACHETEUR"];
-const unites = ["KG", "SAC", "TRICYCLE", "TONNE", 'BOITE','PLANCHES','PIECES','LITRES'];
-const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-
+const unites = ["KG", "SAC", "TRICYCLE", "TONNE", 'BOITE', 'PLANCHES', 'PIECES', 'LITRES'];
+// const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
 // =====================================================
 // Solution 2: Adapter le schéma Zod au type ProductsRequest existant
@@ -248,7 +246,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                     setStatusCode(res.statusCode);
                     setOpen(true);
                     // toast.success(res.message);
-                    // fechproductsByCode();
+                    fechproductsByCode();
                     // setActiveTab('liste');
                 } else {
                     setNotifications(res.message);
@@ -265,7 +263,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                     setStatusCode(res.statusCode);
                     setOpen(true);
                     // toast.success(res.message);
-                    // fechproductsByCode();
+                    fechproductsByCode();
                     setActiveTab('liste');
                 } else {
                     setNotifications(res.message);
@@ -316,8 +314,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                                     sousPrefectureId: value.sousPrefectureId ?? '',
                                     localiteId: value.localiteId ?? '',
                                 })
-                            }
-                        />
+                            } />
                     </div>
 
                     <div className="md:col-span-2">
@@ -474,45 +471,15 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
 
                 </div>
 
-                <Card>
-                    <div className="flex flex-col md:flex-row md:space-x-8">
-                        {/* Image principale à gauche */}
-                        <div className="md:w-1/2">
-                            <CardHeader>
-                                <CardTitle>Image principale</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {initialValues?.imageUrl ? (
-                                    <div className="relative w-40 h-40 aspect-square rounded-md overflow-hidden">
-                                        <Image src={initialValues.imageUrl} alt="Image principale" fill className="object-cover" loading="lazy" unoptimized />
-                                    </div>
-                                ) : (
-                                    <p className="text-muted-foreground text-center">Aucune image principale disponible.</p>
-                                )}
-                            </CardContent>
-                        </div>
-
-                        {/* Autres images à droite */}
-                        <div className="mt-8 md:mt-0 md:w-1/2">
-                            <CardHeader>
-                                <CardTitle>Autres images</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {allImages.length > 0 ? (
-                                    <div className="flex flex-wrap justify-center gap-4">
-                                        {allImages.map((imageUrl, index) => (
-                                            <div key={index} className="w-24 h-24 relative rounded-md overflow-hidden">
-                                                <Image src={imageUrl} alt={`Image ${index + 1}`} fill className="object-cover" loading="lazy" unoptimized />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-muted-foreground text-center">Aucune autre image disponible.</p>
-                                )}
-                            </CardContent>
-                        </div>
-                    </div>
-                </Card>
+                <ProductImagesManager
+                    productId={initialValues?.id}
+                    mainImageUrl={initialValues?.imageUrl}
+                    additionalImages={allImages ?? []}
+                    onImagesDeleted={() => {
+                        fechproductsByCode();
+                        setActiveTab('liste');
+                    }}
+                    />
 
                 {/* Upload fichiers */}
                 <Card>
@@ -523,7 +490,7 @@ export default function ProductForm({ initialValues, userEnrollementData, fechpr
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <Camera className="h-5 w-5 text-gray-600" />
-                                <h3 className="font-semibold">Image principal du produit</h3>
+                                <h3 className="font-semibold">Image principal du produit (1 Image maximum)</h3>
                             </div>
 
                             <FileUploader name="images" multiple={false} value={files} onValueChange={handleValueChange} onUpload={handleUpload} progresses={progresses} />

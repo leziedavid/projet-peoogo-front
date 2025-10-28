@@ -73,6 +73,22 @@ export const deleteProduct = async (id: string): Promise<BaseResponse<any>> => {
     }
 }
 
+// ✅ Supprimer une ou plusieurs images d'un produit
+export const deleteProductImages = async (productId: string,fileUrls: string[]): Promise<BaseResponse<any>> => {
+    try {
+        const response = await secureFetch(`${getBaseUrl()}/product/${productId}/images`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileUrls }),
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Erreur lors de la suppression des images du produit :", error);
+        throw error;
+    }
+};
+
+
 // getProductById
 export const getProductById = async (id: string): Promise<BaseResponse<Product>> => {
     try {
@@ -267,7 +283,6 @@ export const getGlobalProductStats = async (): Promise<BaseResponse<Statistiques
     }
 }
 
-// // filterProductsWithStatus
 // @Get('filter-produits-with-status')
 
 export const filterProductsWithStatus = async (data: Filtre, page: number, limit: number): Promise<BaseResponse<Pagination<Product>>> => {

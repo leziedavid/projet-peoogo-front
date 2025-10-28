@@ -99,10 +99,11 @@ export default function Page() {
             description: row.description ?? "",
             decoupage: row.decoupage ?? {} as Decoupage,
             imageUrl: row.imageUrl ?? undefined, // utile si tu veux pré-afficher
-            allimages: row.allimages ?? [],      // idem
+            allimages: row.images ?? [],      // idem
         };
 
         setInitialValues(productUpdateData);
+
 
         const userEnrollement: UserEnrollementData = {
             code: row.userInfo?.code ?? "",
@@ -161,6 +162,8 @@ export default function Page() {
                 </div>
 
                 <DashboardProductAdmin userName={userEnrollementData?.user.name ?? "Producteur"} onChangeTab={ChangeTabs} activeTab={activeTab} statistique={statistique} />
+
+                {/* <pre> {JSON.stringify(products, null, 2)}</pre> */}
 
                 <div className="flex justify-center items-center">
                     <>
