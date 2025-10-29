@@ -78,7 +78,7 @@ export default function MyMarket() {
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [limit] = useState(3);
+    const [limit] = useState(10);
     const [speculations, setSpeculations] = useState<SpeculationsResponse[]>([]);
     const [categories, setCategorie] = useState<CategorieResponse[]>([]);
 
